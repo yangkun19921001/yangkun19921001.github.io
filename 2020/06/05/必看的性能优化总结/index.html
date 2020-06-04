@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="generator" content="Hexo 4.2.1"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>必看的性能优化总结 - DevYK 个人博客</title><meta description="前言如果你已经有 2 - 3 年以上开发经验还不懂的怎么去优化自己的项目，那就有点说不过去了，下面是我自己总结的一套入门级别的 Android 性能优化。如果图片不清晰文末可以下载原始 xmind 图。  如果你正在找工作, 那么你需要一份 Android 高级开发面试宝典"><meta property="og:type" content="blog"><meta property="og:title" content="必看的性能优化总结"><meta property="og:url" content="http://yoursite.com/2020/06/05/%E5%BF%85%E7%9C%8B%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%80%BB%E7%BB%93/"><meta property="og:site_name" content="DevYK 个人博客"><meta property="og:description" content="前言如果你已经有 2 - 3 年以上开发经验还不懂的怎么去优化自己的项目，那就有点说不过去了，下面是我自己总结的一套入门级别的 Android 性能优化。如果图片不清晰文末可以下载原始 xmind 图。  如果你正在找工作, 那么你需要一份 Android 高级开发面试宝典"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328142500.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200326235213.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200327002322.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328142500.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200326235213.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200327002322.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328153207.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328153407.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328155512.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328155553.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328160234.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328160744.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328161301.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328161835.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328162442.png"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328163046.png"><meta property="article:published_time" content="2020-06-04T16:33:00.000Z"><meta property="article:modified_time" content="2020-06-04T16:33:52.329Z"><meta property="article:author" content="DevYK"><meta property="article:tag" content="性能优化"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328142500.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2020/06/05/%E5%BF%85%E7%9C%8B%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%80%BB%E7%BB%93/"},"headline":"DevYK 个人博客","image":["https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328142500.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200326235213.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200327002322.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328142500.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200326235213.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200327002322.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328153207.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328153407.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328155512.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328155553.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328160234.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328160744.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328161301.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328161835.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328162442.png","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328163046.png"],"datePublished":"2020-06-04T16:33:00.000Z","dateModified":"2020-06-04T16:33:52.329Z","author":{"@type":"Person","name":"DevYK"},"description":"前言如果你已经有 2 - 3 年以上开发经验还不懂的怎么去优化自己的项目，那就有点说不过去了，下面是我自己总结的一套入门级别的 Android 性能优化。如果图片不清晰文末可以下载原始 xmind 图。  如果你正在找工作, 那么你需要一份 Android 高级开发面试宝典"}</script><link rel="canonical" href="http://yoursite.com/2020/06/05/%E5%BF%85%E7%9C%8B%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%80%BB%E7%BB%93/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" defer></script><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="DevYK 个人博客" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">about</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta size-small is-uppercase level is-mobile"><div class="level-left"><time class="level-item" dateTime="2020-06-04T16:33:00.000Z" title="2020-06-04T16:33:00.000Z">2020-06-05</time><span class="level-item"> DevYK </span><span class="level-item"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a><span> / </span><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></span><span class="level-item">36 分钟 读完 (大约 5399 个字)</span><span class="level-item" id="busuanzi_container_page_pv"><i class="far fa-eye"></i>&nbsp;&nbsp;<span id="busuanzi_value_page_pv">0</span>次访问</span></div></div><h1 class="title is-3 is-size-4-mobile">必看的性能优化总结</h1><div class="content"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>如果你已经有 2 - 3 年以上开发经验还不懂的怎么去优化自己的项目，那就有点说不过去了，下面是我自己总结的一套入门级别的 Android 性能优化。如果图片不清晰文末可以下载原始 xmind 图。</p>
+<blockquote>
+<p>如果你正在找工作, 那么你需要一份 <a href="https://github.com/yangkun19921001/Blog/blob/master/%E7%AC%94%E8%AF%95%E9%9D%A2%E8%AF%95/Android%E9%AB%98%E7%BA%A7%E5%B7%A5%E7%A8%8B%E5%B8%88%E9%9D%A2%E8%AF%95%E5%BF%85%E5%A4%87/README.md">Android 高级开发面试宝典</a></p>
+</blockquote>
+<a id="more"></a>
+
+<h2 id="1、-你对-APP-的启动有过研究吗-有做过相关的启动优化吗"><a href="#1、-你对-APP-的启动有过研究吗-有做过相关的启动优化吗" class="headerlink" title="1、 你对 APP 的启动有过研究吗? 有做过相关的启动优化吗?"></a>1、 你对 APP 的启动有过研究吗? 有做过相关的启动优化吗?</h2><p>程序员: </p>
+<p>之前做热修复的时候研究过 Application 的启动原理。项目中也做过一些启动优化。</p>
+<p>面试官: </p>
+<blockquote>
+<p>哦，你之前研究过热修复? (这个时候有可能就会深入的问问热修复的原理，这里咱们就不讨论热修复原理) 那你说说对启动方面都做了哪些优化?</p>
+</blockquote>
+<p>程序员:</p>
+<ol>
+<li><p>我发现程序在冷启动的时候，会有 1s 左右的白屏闪现，低版本是黑屏的现象，在这期间我通过翻阅系统主题源码，发现了系统 AppTheme 设置了一个 <code>windowBackground</code> ，由此推断就是这个属性捣的鬼，开始我是通过设置 <code>windowIsTranslucent</code> 透明属性，发现虽然没有了白屏，但是中间还是有一小段不可见，这个用户体验还是不好的。最后我观察了市面上大部分的 Android 软件在冷启动的时候都会有一个  <code>Splash</code> 的广告页，同时在增加一个倒数的计时器，最后才进入到登录页面或者主页面。我最后也是这样做的，原因是这样做的好处可以让用户先基于广告对本 APP 有一个基本认识，而且在倒数的时候也预留给咱们一些对插件和一些必须或者耗时的初始化做一些准备。</p>
+<blockquote>
+<p>Ps：这里会让面试官感觉你是一个注重用户体验的</p>
+</blockquote>
+</li>
+<li><p>通过翻阅 Application 启动的源码，当我们点击桌面图标进入我们软件应用的时候，会由 AMS 通过 Socket 给 Zygote 发送一个 fork 子进程的消息，当 Zygote fork 子进程完成之后会通过反射启动 ActivityThread##main 函数，最后又由 AMS 通过 aidl 告诉 ActivityThread##H 来反射启动创建Application 实例，并且依次执行 <code>attachBaseContext</code> 、<code>onCreate</code> 生命周期，由此可见我们不能在这 2 个生命周期里做主线程耗时操作。</p>
+<blockquote>
+<p>Ps: 这里会让面试官感觉你对 App 应用的启动流程研究的比较深，有过真实的翻阅底层源码，而并不是背诵答案。</p>
+</blockquote>
+</li>
+<li><p>知道了  <code>attachBaseContext</code> 、<code>onCreate</code>  在应用中最先启动，那么我们就可以通过 TreceView 等性能检测工具，来检测具体函数耗时时间，然后来对其做具体的优化。</p>
+<ol>
+<li>项目不及时需要的代码通过异步加载。</li>
+<li>将对一些使用率不高的初始化，做懒加载。</li>
+<li>将对一些耗时任务通过开启一个 IntentService来处理。</li>
+<li>还通过 redex 重排列 class 文件，将启动阶段需要用到的文件在 APK 文件中排布在一起，尽可能的利用 Linux 文件系统的 pagecache 机制，用最少的磁盘 IO 次数，读取尽可能多的启动阶段需要的文件，减少 IO 开销，从而达到提升启动性能的目的。</li>
+<li>通过抖音发布的文章知晓在 5.0 低版本可以做 <code>MultiDex</code> 优化，在第一次启动的时候，直接加载没有经过 OPT 优化的原始 DEX，先使得 APP 能够正常启动。然后在后台启动一个单独进程，慢慢地做完 DEX 的 OPT 工作，尽可能避免影响到前台 APP 的正常使用。</li>
+</ol>
+<blockquote>
+<p>Ps：1. 面试官这里会觉得你对启动优化确实了解的不错，有一定的启动优化经验。</p>
+<ol start="2">
+<li>在第五点面试官会觉得你比较关注该圈子的动态，发现好的解决方案，并能用在自己项目上。这一点是加分项!</li>
+</ol>
+</blockquote>
+</li>
+<li><p>Application 启动完之后，AMS 会找出前台栈顶待启动的 Activity , 最后也是通过 AIDL 通知 ActivityThread#H 来进行对 Activity 的实例化并依次执行生命周期 <code>onCreate</code>、<code>onStart</code>、<code>onRemuse</code>  函数，那么这里由于 onCreate 生命周期中如果调用了 <code>setContentView</code> 函数，底层就会通过将 XML2View 那么这个过程肯定是耗时的。所以要精简 XML 布局代码，尽可能的使用 <code>ViewStub</code>、<code>include</code> 、<code>merge</code> 标签来优化布局。接着在 onResume 声明周期中会请求 JNI 接收 Vsync (垂直同步刷新的信号) 请求，16ms 之后如果接收到了刷新的消息，那么就会对 DecorView 进行 <code>onMeasure-&gt;onLayout-&gt;onDraw</code> 绘制。最后才是将 Activity 的根布局 DecorView 添加到 Window 并交于 SurfaceFlinger 显示。</p>
+<p>所以这一步除了要精简 XML 布局，还有对自定义 View 的测量，布局，绘制等函数不能有耗时和导致 GC 的操作。最后也可以通过 <code>TreaceView</code> 工具来检测这三个声明周期耗时时间，从而进一步优化，达到极限。</p>
+<blockquote>
+<p>这一步给面试官的感觉你对整个 Activity 的启动和 View 的绘制还有刷新机制都有深入的研究，那么此刻你肯定给面试官留了一个好印象，说明你平时对这些源码级别的研究比较广泛，透彻。</p>
+</blockquote>
+</li>
+</ol>
+<p>总结:</p>
+<p>最后我基于以上的优化减少了 50% 启动时间。</p>
+<p>面试官:</p>
+<blockquote>
+<p>嗯，研究的挺深的，源码平时不少看吧。</p>
+</blockquote>
+<p>程序员:</p>
+<p>到这里，我知道这一关算是过了!</p>
+<h2 id="2、有做过相关的内存优化吗"><a href="#2、有做过相关的内存优化吗" class="headerlink" title="2、有做过相关的内存优化吗?"></a>2、有做过相关的内存优化吗?</h2><p>程序员:</p>
+<p>有做过，目前的项目内存优化还是挺多的，要不我先说一下优化内存有什么好处吧？咱们不能盲目的去优化！</p>
+<blockquote>
+<p>有的时候对于自己熟悉的领域，一定要主动出击，自己主导这场面试。</p>
+</blockquote>
+<p>面试官:</p>
+<blockquote>
+<p>可以。</p>
+<p>Ps：这里大多数面试官会同意你的请求，除非遇见装B的。</p>
+</blockquote>
+<p>程序员:</p>
+<p>好处:</p>
+<ol>
+<li>减少 OOM ，可以提高程序的稳定性。</li>
+<li>减少卡顿，提高应用流畅性。</li>
+<li>减少内存占用，提高应用后台存活性。</li>
+<li>减少程序异常，降低应用 Crash 率, 提高稳定性。</li>
+</ol>
+<p>那么我基于这四点，我的程序做了如下优化:</p>
+<ul>
+<li><p>1.减少 OOM</p>
+<p>在应用开发阶段我比较喜欢用 LeakCanary 这款性能检测工具，好处是它能实时的告诉我具体哪个类发现了内存泄漏(如果你对 LeakCanary 的原理了解的话，可以说一说它是怎么检测的)。</p>
+<p>还有我们要明白为什么应用程序会发送 OOM ，又该怎么去避免它？</p>
+<p>发生 OOM 的场景是当申请 1M 的内存空间时，如果你要往该内存空间存入 2M 的数据，那么此时就会发生 OOM。</p>
+<p>在应用程序中我们不仅要避免直接导致 OOM 的场景还要避免间接导致 OOM 的场景。间接的话也就是要避免内存泄漏的场景。</p>
+<p>内存泄漏的场景是这个对象不再使用时，应用完整的执行最后的生命周期，但是由于某些原因，对象虽然已经不再使用，仍然会在内存中存在而导致 GC 不会去回收它，这就意味着发生了内存泄漏。(这里可以介绍下 GC 回收机制，回收算法，知识点尽量往外扩展而不脱离本题)</p>
+<p>最后在说一下在实际开发中避免内存泄漏的场景:</p>
+<ol>
+<li>资源型对象未关闭: Cursor,File</li>
+<li>注册对象未销毁: 广播，回调监听</li>
+<li>类的静态变量持有大数据对象</li>
+<li>非静态内部类的静态实例</li>
+<li>Handler 临时性内存泄漏: 使用静态 + 弱引用，退出即销毁</li>
+<li>容器中的对象没清理造成的内存泄漏</li>
+<li>WebView: 使用单独进程</li>
+</ol>
+<p>其实这些都是基础，把它记下就行了。记得多了在实际开发中就有印象了。</p>
+</li>
+<li><p>2.减少卡顿</p>
+<p>怎么减少卡顿? 那么我们可以从 2 个原理方面来探讨卡顿的根本原因，第一个原理方面是绘制原理，另一个就是刷新原理。</p>
+<ol>
+<li><p>绘制原理:</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328142500.png" alt=""></p>
+</li>
+<li><p>刷新原理:</p>
+<p>View 的 requestLayout 和 ViewRootImpl##setView 最终都会调用 ViewRootImpl 的 requestLayout 方法，然后通过 scheduleTraversals 方法向 Choreographer 提交一个绘制任务，然后再通过 DisplayEventReceiver 向底层请求 vsync 垂直同步信号，当 vsync 信号来的时候，会通过 JNI 回调回来，在通过 Handler 往消息队列 post 一个异步任务，最终是 ViewRootImpl 去执行绘制任务，最后调用 performTraversals 方法，完成绘制。</p>
+<p>详细流程可以参考下面流程图:</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200326235213.png" alt=""></p>
+</li>
+</ol>
+</li>
+</ul>
+<p>  卡顿的根本原因:</p>
+<p>  从刷新原理来看卡顿的根本原理是有两个地方会造成掉帧:</p>
+<p>  一个是主线程有其它耗时操作，导致doFrame 没有机会在 vsync 信号发出之后 16 毫秒内调用；</p>
+<p>  还有一个就是当前doFrame方法耗时，绘制太久，下一个 vsync 信号来的时候这一帧还没画完，造成掉帧。</p>
+<p>  既然我们知道了卡顿的根本原因，那么我们就可以监控卡顿，从而可以对卡顿优化做到极致。我们可以从下面三个方面来监控应用程序卡顿:</p>
+<ol>
+<li><p>基于 Looper 的 Printer 分发消息的时间差值来判断是否卡顿。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//1. 开启监听</span></span><br><span class="line">  Looper.myLooper().setMessageLogging(<span class="keyword">new</span></span><br><span class="line">                    LogPrinter(Log.DEBUG, <span class="string">"ActivityThread"</span>));</span><br><span class="line"></span><br><span class="line"><span class="comment">//2. 只要分发消息那么就会在之前和之后分别打印消息</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">loop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="keyword">final</span> Looper me = myLooper();</span><br><span class="line">   <span class="keyword">if</span> (me == <span class="keyword">null</span>) &#123;</span><br><span class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"No Looper; Looper.prepare() wasn't called on this thread."</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">final</span> MessageQueue queue = me.mQueue;</span><br><span class="line">		...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">    	Message msg = queue.next(); <span class="comment">// might block</span></span><br><span class="line">		...</span><br><span class="line">      <span class="comment">//分发之前打印</span></span><br><span class="line">      <span class="keyword">final</span> Printer logging = me.mLogging;</span><br><span class="line">     <span class="keyword">if</span> (logging != <span class="keyword">null</span>) &#123;</span><br><span class="line">        logging.println(<span class="string">"&gt;&gt;&gt;&gt;&gt; Dispatching to "</span> + msg.target + <span class="string">" "</span> +</span><br><span class="line">                        msg.callback + <span class="string">": "</span> + msg.what);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">			...</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">       <span class="comment">//分发消息</span></span><br><span class="line">       msg.target.dispatchMessage(msg);</span><br><span class="line">			...</span><br><span class="line">      <span class="comment">//分发之后打印</span></span><br><span class="line">			<span class="keyword">if</span> (logging != <span class="keyword">null</span>) &#123;</span><br><span class="line">        logging.println(<span class="string">"&lt;&lt;&lt;&lt;&lt; Finished to "</span> + msg.target + <span class="string">" "</span> + msg.callback);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>基于 Choreographer  回调函数 postFrameCallback 来监控</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200327002322.png" alt=""></p>
+</li>
+<li><p>基于开源框架 <a href="https://github.com/markzhai/AndroidPerformanceMonitor">BlockCanary</a> 来监控</p>
+</li>
+<li><p>基于开源框架 <a href="https://github.com/SusionSuc/rabbit-client">rabbit-client</a> 来监控</p>
+</li>
+</ol>
+<p>  怎么避免卡顿：</p>
+<p>  一定要避免在主线程中做耗时任务，总结一下 Android 中主线程的场景:</p>
+<ol>
+<li><p>UI 生命周期的控制</p>
+</li>
+<li><p>系统事件的处理</p>
+</li>
+<li><p>消息处理</p>
+</li>
+<li><p>界面布局</p>
+</li>
+<li><p>界面绘制</p>
+</li>
+<li><p>界面刷新</p>
+</li>
+<li><p>…</p>
+<p>还有一个最重要的就是避免内存抖动，不要在短时间内频繁的内存分配和释放。</p>
+<p>基于这几点去说卡顿肯定是没有问题的。</p>
+</li>
+</ol>
+<ul>
+<li><p>3.减少内存占用</p>
+<p>可以从如下几个方面去展开说明:</p>
+<ol>
+<li>AutoBoxing(自动装箱): 能用小的坚决不用大的。</li>
+<li>内存复用</li>
+<li>使用最优的数据类型 </li>
+<li>枚举类型: 使用注解枚举限制替换 Enum</li>
+<li>图片内存优化（这里可以从 Glide 等开源框架去说下它们是怎么设计的）<ol>
+<li>选择合适的位图格式</li>
+<li>bitmap 内存复用，压缩</li>
+<li>图片的多级缓存</li>
+</ol>
+</li>
+<li>基本数据类型如果不用修改的建议全部写成 static final,因为 它不需要进行初始化工作，直接打包到 dex 就可以直接使用，并不会在 类 中进行申请内存</li>
+<li>字符串拼接别用 +=，使用 StringBuffer 或 StringBuilder </li>
+<li>不要在 onMeause, onLayout, onDraw 中去刷新 UI</li>
+<li>尽量使用 C++ 代码转换 YUV 格式，别用 Java 代码转换 RGB 等格式，真的很占用内存</li>
+</ol>
+</li>
+<li><p>4.减少程序异常</p>
+<p>减少程序异常那么我们可以从稳定性和 Crash 来分别说明。</p>
+<p>这个我们将在第四点会详细的介绍程序的稳定性和 Crash 。</p>
+</li>
+</ul>
+<blockquote>
+<p>如果说出这些，再实际开发中举例说明一下怎么解决的应该是没有问题的。</p>
+</blockquote>
+<h2 id="3、你在项目中有没有遇见卡顿问题？是怎么排查卡顿？又是怎么优化的"><a href="#3、你在项目中有没有遇见卡顿问题？是怎么排查卡顿？又是怎么优化的" class="headerlink" title="3、你在项目中有没有遇见卡顿问题？是怎么排查卡顿？又是怎么优化的?"></a>3、你在项目中有没有遇见卡顿问题？是怎么排查卡顿？又是怎么优化的?</h2><p>程序员:</p>
+<p>有遇见, 比如在主线程中做耗时操作、频繁的创建对象和销毁对象导致 GC 回收频繁、布局的层级多等。</p>
+<p>面试官:</p>
+<blockquote>
+<p>嗯，那具体说说是怎么优化的。</p>
+</blockquote>
+<p>程序员:</p>
+<p>这里我们还是可以从显示原理和优化建议来展开说明，参考如下:</p>
+<ol>
+<li>显示原理:</li>
+</ol>
+<ul>
+<li><p>绘制原理:</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328142500.png" alt=""></p>
+</li>
+</ul>
+<ul>
+<li><p>刷新原理:</p>
+<p>View 的 requestLayout 和 ViewRootImpl##setView 最终都会调用 ViewRootImpl 的 requestLayout 方法，然后通过 scheduleTraversals 方法向 Choreographer 提交一个绘制任务，然后再通过 DisplayEventReceiver 向底层请求 vsync 垂直同步信号，当 vsync 信号来的时候，会通过 JNI 回调回来，在通过 Handler 往消息队列 post 一个异步任务，最终是 ViewRootImpl 去执行绘制任务，最后调用 performTraversals 方法，完成绘制。</p>
+<p>详细流程可以参考下面流程图:</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200326235213.png" alt=""></p>
+</li>
+</ul>
+<ol start="2">
+<li><p>卡顿的根本原因:</p>
+<p>从刷新原理来看卡顿的根本原理是有两个地方会造成掉帧:</p>
+<p>一个是主线程有其它耗时操作，导致doFrame 没有机会在 vsync 信号发出之后 16 毫秒内调用；</p>
+<p>还有一个就是当前 doFrame 方法耗时，绘制太久，下一个 vsync 信号来的时候这一帧还没画完，造成掉帧。</p>
+<p>既然我们知道了卡顿的根本原因，那么我们就可以监控卡顿，从而可以对卡顿优化做到极致。我们可以从下面三个方面来监控应用程序卡顿:</p>
+<ol>
+<li><p>基于 Looper 的 Printer 分发消息的时间差值来判断是否卡顿。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//1. 开启监听</span></span><br><span class="line">  Looper.myLooper().setMessageLogging(<span class="keyword">new</span></span><br><span class="line">                    LogPrinter(Log.DEBUG, <span class="string">"ActivityThread"</span>));</span><br><span class="line"></span><br><span class="line"><span class="comment">//2. 只要分发消息那么就会在之前和之后分别打印消息</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">loop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="keyword">final</span> Looper me = myLooper();</span><br><span class="line">   <span class="keyword">if</span> (me == <span class="keyword">null</span>) &#123;</span><br><span class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"No Looper; Looper.prepare() wasn't called on this thread."</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">final</span> MessageQueue queue = me.mQueue;</span><br><span class="line">		...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">    	Message msg = queue.next(); <span class="comment">// might block</span></span><br><span class="line">		...</span><br><span class="line">      <span class="comment">//分发之前打印</span></span><br><span class="line">      <span class="keyword">final</span> Printer logging = me.mLogging;</span><br><span class="line">     <span class="keyword">if</span> (logging != <span class="keyword">null</span>) &#123;</span><br><span class="line">        logging.println(<span class="string">"&gt;&gt;&gt;&gt;&gt; Dispatching to "</span> + msg.target + <span class="string">" "</span> +</span><br><span class="line">                        msg.callback + <span class="string">": "</span> + msg.what);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">			...</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">       <span class="comment">//分发消息</span></span><br><span class="line">       msg.target.dispatchMessage(msg);</span><br><span class="line">			...</span><br><span class="line">      <span class="comment">//分发之后打印</span></span><br><span class="line">			<span class="keyword">if</span> (logging != <span class="keyword">null</span>) &#123;</span><br><span class="line">        logging.println(<span class="string">"&lt;&lt;&lt;&lt;&lt; Finished to "</span> + msg.target + <span class="string">" "</span> + msg.callback);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>基于 Choreographer  回调函数 postFrameCallback 来监控</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200327002322.png" alt=""></p>
+</li>
+<li><p>基于开源框架 <a href="https://github.com/markzhai/AndroidPerformanceMonitor">BlockCanary</a> 来监控</p>
+</li>
+<li><p>基于开源框架 <a href="https://github.com/SusionSuc/rabbit-client">rabbit-client</a> 来监控</p>
+</li>
+</ol>
+</li>
+</ol>
+<ol start="2">
+<li><p>怎么可以提高程序运行流畅</p>
+<p><strong>1.布局优化:</strong></p>
+<p>1.1 布局优化分析工具:</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328153207.png" alt=""></p>
+<p>1.2 优化方案:</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328153407.png" alt=""></p>
+</li>
+<li><p>提升动画性能</p>
+<ol>
+<li>尽量别用补间动画，改为属性动画，因为通过性能监控发现补间动画重绘非常频繁</li>
+<li>使用硬件加速提高渲染速度，实现平滑的动画效果。</li>
+</ol>
+</li>
+<li><p>怎么避免卡顿：</p>
+<p>一定要避免在主线程中做耗时任务，总结一下 Android 中主线程的场景:</p>
+<ol>
+<li>UI 生命周期的控制</li>
+<li>系统事件的处理</li>
+<li>消息处理</li>
+<li>界面布局</li>
+<li>界面绘制</li>
+<li>界面刷新</li>
+<li>…</li>
+</ol>
+</li>
+</ol>
+<blockquote>
+<p>基于这几点去说卡顿肯定是没有问题的。</p>
+</blockquote>
+<h2 id="4、怎么保证-APP-的稳定运行"><a href="#4、怎么保证-APP-的稳定运行" class="headerlink" title="4、怎么保证 APP 的稳定运行?"></a>4、怎么保证 APP 的稳定运行?</h2><p>程序员:</p>
+<p>保证程序的稳定我们可以从内存、代码质量、Crash、ANR、后台存活等知识点来展开优化。</p>
+<p>面试官:</p>
+<blockquote>
+<p>那你具体说说你是怎么做的？</p>
+</blockquote>
+<p>程序员:</p>
+<p><strong>1.内存</strong></p>
+<p>可以从第二点内存优化来说明</p>
+<p><strong>2.代码质量</strong></p>
+<ol>
+<li>团队之前相互代码审查，保证了代码的质量，也可以学习到了其它同事码代码的思想。</li>
+<li>使用 Link 扫描代码，查看是否有缺陷性。</li>
+</ol>
+<p><strong>3. Crash</strong></p>
+<ol>
+<li>通过实现 Thread.UncaughtExceptionHandler 接口来全局监控异常状态，发生 Crash 及时上传日志给后台，并且及时通过插件包修复。</li>
+<li>Native 线上通过 Bugly 框架实时监控程序异常状况，线下局域网使用 Google 开源的 breakpad 框架。发生异常就搜集日志上传服务器(这里要注意的是日志上传的性能问题，后面省电模块会说明)</li>
+</ol>
+<p><strong>4. ANR</strong></p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328155512.png" alt=""></p>
+<p><strong>5. 后台存活</strong></p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328155553.png" alt=""></p>
+<p>面试官:</p>
+<blockquote>
+<p>嗯，你对知识点掌握的挺好。</p>
+</blockquote>
+<p>说完这些，这一关也算是过了。</p>
+<h2 id="5、说说你在项目中网络优化"><a href="#5、说说你在项目中网络优化" class="headerlink" title="5、说说你在项目中网络优化?"></a>5、说说你在项目中网络优化?</h2><p>程序员:</p>
+<p>有，这一点其实可以通过 OKHTTP 连接池和 Http 缓存来说一下(当然这里不会再展开分析 OKHTTP 源码了)</p>
+<p>面试官:</p>
+<blockquote>
+<p>那你具体说一下吧</p>
+</blockquote>
+<p>程序员</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328160234.png" alt=""></p>
+<blockquote>
+<p>说了这些之后，再说一下你当前使用网络框架它们做了哪些优化比如 OKHTTP(Socket 连接池、Http缓存、责任链)、Retrofit(动态代理)。说了这些一般这关也算是过了。</p>
+</blockquote>
+<h2 id="6、你在项目中有用过哪些存储方式-对它们的性能有过优化吗？"><a href="#6、你在项目中有用过哪些存储方式-对它们的性能有过优化吗？" class="headerlink" title="6、你在项目中有用过哪些存储方式? 对它们的性能有过优化吗？"></a>6、你在项目中有用过哪些存储方式? 对它们的性能有过优化吗？</h2><p>程序员:</p>
+<p>主要用过 sp,File,SQLite 存储方式。其中对 sp 和 sqlite 做了优化。</p>
+<p>面试官:</p>
+<blockquote>
+<p>那你说说都做了哪些优化?</p>
+</blockquote>
+<p>程序员:</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328160744.png" alt=""></p>
+<p>这一块如果你使用过其它第三方的数据库，可以说说它们的原理和它们存取的方式。</p>
+<h2 id="7、你在项目中有做过自定义-View-吗？有对它做过什么优化？"><a href="#7、你在项目中有做过自定义-View-吗？有对它做过什么优化？" class="headerlink" title="7、你在项目中有做过自定义 View 吗？有对它做过什么优化？"></a>7、你在项目中有做过自定义 View 吗？有对它做过什么优化？</h2><p>程序员:</p>
+<p>有做过。比如重复绘制，还有大图长图有过优化。</p>
+<p>面试官:</p>
+<blockquote>
+<p>那具体说一说</p>
+</blockquote>
+<p>程序员:</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328161301.png" alt=""></p>
+<blockquote>
+<p>最后也是结合真实场景具体说一个。</p>
+</blockquote>
+<h2 id="8、你们项目的耗电量怎么样-有做过优化吗"><a href="#8、你们项目的耗电量怎么样-有做过优化吗" class="headerlink" title="8、你们项目的耗电量怎么样? 有做过优化吗?"></a>8、你们项目的耗电量怎么样? 有做过优化吗?</h2><p>程序员:</p>
+<p>在没有优化之前持续工作 30 分钟的耗电量是 8%, 优化后是 4%。</p>
+<p>面试官:</p>
+<blockquote>
+<p>那你说一说你是怎么优化的。</p>
+</blockquote>
+<p>程序员:</p>
+<p>因为我们产品是一款社交通信的软件，有音视频通话、GPS 定位上报、长连接的场景，所以优化起来确实有点困难。不过最后也还是优化了一半的电量下去。主要做了如下优化:</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328161835.png" alt=""></p>
+<blockquote>
+<p>说出这些之后，在结合项目一个真实的优化点来说明一下。</p>
+</blockquote>
+<h2 id="9、有做过日志优化吗"><a href="#9、有做过日志优化吗" class="headerlink" title="9、有做过日志优化吗?"></a>9、有做过日志优化吗?</h2><p>程序员:</p>
+<p>有优化，在之前没有考虑任何性能的情况下，我是直接有 log 就写入文件，尽管我开了线程池去写文件，只要软件在运行那么就会频繁的使 CPU 进行工作。这也间接的导致了耗电。</p>
+<p>面试官:</p>
+<blockquote>
+<p>那你具体说一下，最后怎么解决这个问题的?</p>
+</blockquote>
+<p>程序员:</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328162442.png" alt=""></p>
+<blockquote>
+<p>展开上面这些点说明之后，面试官一般不会为难你。</p>
+</blockquote>
+<h2 id="10、你们-APK-有多大？有做过-APK-体积相关的优化吗"><a href="#10、你们-APK-有多大？有做过-APK-体积相关的优化吗" class="headerlink" title="10、你们 APK 有多大？有做过 APK 体积相关的优化吗?"></a>10、你们 APK 有多大？有做过 APK 体积相关的优化吗?</h2><p>程序员:</p>
+<p>有过优化，在没有优化之前项目的包体积大小是 80M,优化之后是 50M.</p>
+<p>面试官:</p>
+<blockquote>
+<p>说一说是怎么优化的</p>
+</blockquote>
+<p>程序员:</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200328163046.png" alt=""></p>
+<blockquote>
+<p>基于这几点优化方案，一般都能解决 APK 体积问题。最后再把自己项目 APK 体积优化步骤结合上面点说一下就行。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实性能优化点都是息息相关的，比如卡顿会涉及内存、显示，启动也会涉及 APK dex 的影响。所以说性能优化不仅仅是单方面的优化，一定要掌握最基本的优化方案，才能更加深入探讨性能原理问题。</p>
+<p>在这里也建立大家多看流行开源框架源码，比如 Glide (内存方面), OKhttp (网络连接方面) 优化的真的很极致。到这里性能优化方面的知识也就说完了，下来一定好好去消化。</p>
+<p><a href="https://github.com/yangkun19921001/Blog/tree/master/xmind/%E7%83%AD%E9%97%A8%E6%8A%80%E6%9C%AF%E6%80%BB%E7%BB%93">所有 xmind 原图点击获得</a></p>
+</div><div class="article-tags size-small mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></div><!--!--></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button is-info donate"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200604150710.jpeg" alt="支付宝"></span></a><a class="button donate" href="/" style="background-color:rgba(255,128,62,.87);border-color:transparent;color:white;" target="_blank" rel="noopener"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button is-danger donate" href="/" target="_blank" rel="noopener"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><a class="button is-success donate"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200604150835.png" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%B8%89-%E7%A8%B3%E5%AE%9A%E8%BF%90%E8%A1%8C%E4%BC%98%E5%8C%96%E4%B9%8B%E6%8D%95%E8%8E%B7-Native-Crash/"><span class="level-item">性能优化 (十三) 稳定运行优化之捕获 Native Crash </span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="content" id="valine-thread"></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script>new Valine({
+            el: '#valine-thread' ,
+            appId: "j16d0HiTJvVWRQzjQN625f4W-gzGzoHsz",
+            appKey: "7cgla0UfvddS9PjRz7Lcvqn7",
+            placeholder: "请遵守中华人民共和国法律法规。填写邮箱信息以接收回复。",
+            avatar: "mm",
+            
+            meta: ["nick","mail","link"],
+            pageSize: 10,
+            lang: "zh-CN",
+            
+            highlight: true,
+            
+            
+            
+            
+            
+            requiredFields: [],
+        });</script></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar is-rounded" src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200427113132.jpeg" alt="DevYK"></figure><p class="title is-size-4 is-block line-height-inherit">DevYK</p><p class="is-size-6 is-block">Android/NDK/音视频/跨平台</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>BeiJing</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">27</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">6</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">3</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/yangkun19921001" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/yangkun19921001"><i class="fab fa-github"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="QQ" href="http://wpa.qq.com/msgrd?v=1&amp;uin=919079498&amp;site=ioshenmue&amp;menu=yes"><i class="fab fa-qq"></i></a></div></div></div><!--!--><div class="card widget"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile is-mobile" href="https://github.com/yangkun19921001/Blog/blob/master/about.md" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">联系我</span></span><span class="level-right"><span class="level-item tag">github.com</span></span></a></li><li><a class="level is-mobile is-mobile" href="https://juejin.im/user/578259398ac2470061f3a3fb/posts" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">掘金</span></span><span class="level-right"><span class="level-item tag">juejin.im</span></span></a></li></ul></div></div></div><div class="card widget"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile is-marginless" href="/categories/%E4%B8%93%E9%A2%98/"><span class="level-start"><span class="level-item">专题</span></span><span class="level-end"><span class="level-item tag">25</span></span></a><ul class="mr-0"><li><a class="level is-mobile is-marginless" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"><span class="level-start"><span class="level-item">性能优化</span></span><span class="level-end"><span class="level-item tag">13</span></span></a></li><li><a class="level is-mobile is-marginless" href="/categories/%E4%B8%93%E9%A2%98/%E9%9F%B3%E8%A7%86%E9%A2%91/"><span class="level-start"><span class="level-item">音视频</span></span><span class="level-end"><span class="level-item tag">11</span></span></a></li></ul></li><li><a class="level is-mobile is-marginless" href="/categories/%E6%9C%8D%E5%8A%A1/"><span class="level-start"><span class="level-item">服务</span></span><span class="level-end"><span class="level-item tag">2</span></span></a><ul class="mr-0"><li><a class="level is-mobile is-marginless" href="/categories/%E6%9C%8D%E5%8A%A1/apprtc/"><span class="level-start"><span class="level-item">apprtc</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile is-marginless" href="/categories/%E6%9C%8D%E5%8A%A1/nginx/"><span class="level-start"><span class="level-item">nginx</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li></ul></div></div></div><div class="card widget"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile is-marginless" href="/archives/2020/06/"><span class="level-start"><span class="level-item">六月 2020</span></span><span class="level-end"><span class="level-item tag">27</span></span></a></li></ul></div></div></div><div class="card widget"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/webrtc/"><span class="tag">webrtc</span><span class="tag is-grey-lightest">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"><span class="tag">性能优化</span><span class="tag is-grey-lightest">14</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/"><span class="tag">音视频学习路线</span><span class="tag is-grey-lightest">12</span></a></div></div></div></div></div><div class="column-right-shadow is-hidden-widescreen"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3"><div class="card widget"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-04T16:33:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/%E5%BF%85%E7%9C%8B%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%80%BB%E7%BB%93/">必看的性能优化总结</a></p><p class="is-uppercase"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a> / <a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></p></div></article><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-04T16:31:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%B8%89-%E7%A8%B3%E5%AE%9A%E8%BF%90%E8%A1%8C%E4%BC%98%E5%8C%96%E4%B9%8B%E6%8D%95%E8%8E%B7-Native-Crash/">性能优化 (十三) 稳定运行优化之捕获 Native Crash </a></p><p class="is-uppercase"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a> / <a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></p></div></article><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-04T16:30:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%BA%8C-%E4%BD%93%E7%A7%AF%E4%BC%98%E5%8C%96%E4%B9%8B%E6%9E%81%E9%99%90%E7%98%A6%E8%BA%AB/">性能优化 (十二) 体积优化之极限瘦身</a></p><p class="is-uppercase"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a> / <a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></p></div></article><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-04T16:29:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%B8%80-%E7%A8%B3%E5%AE%9A%E8%BF%90%E8%A1%8C%E4%BC%98%E5%8C%96%E4%B9%8B%E7%83%AD%E4%BF%AE%E5%A4%8D%E5%8E%9F%E7%90%86%E6%8E%A2%E7%B4%A2/">性能优化 (十一) 稳定运行优化之热修复原理探索</a></p><p class="is-uppercase"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a> / <a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></p></div></article><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-04T16:27:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81-%E6%8C%81%E7%BB%AD%E8%BF%90%E8%A1%8C%E4%BC%98%E5%8C%96%E4%B9%8B%E8%BF%9B%E7%A8%8B%E4%BF%9D%E6%B4%BB%E5%AE%9E%E7%8E%B0/">性能优化 (十) 稳定运行优化之进程保活实现 </a></p><p class="is-uppercase"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a> / <a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></p></div></article></div></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="DevYK 个人博客" height="28"></a><p class="size-small"><span>&copy; 2020 DevYK</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a><br><span id="busuanzi_container_site_uv">共<span id="busuanzi_value_site_uv">0</span>个访客</span></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            site: {
+                url: 'http://yoursite.com',
+                external_link: {"enable":true,"exclude":[]}
+            },
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
