@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="generator" content="Hexo 4.2.1"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>性能优化 (十一) 稳定运行优化之热修复原理探索 - DevYK 个人博客</title><meta description="完整代码传送阵  热修复的由来 刚发布的版本出现了严重的 bug ,需要开发者去解决 bug，然后在测试打包重新发布，这会耗费大量的人力，物力，代价比较大。 如果当前的 bug 不影响用户使用也不会崩溃，但是了下个版本是大版本，那么两个版本之间间隔时间会很长，这样要等到下个大版本发布在修复 bug , 而之前版本的 bug 还存在，虽说不影响使用，但是是一个潜在的 bug。 版本升级率不高，并且需"><meta property="og:type" content="blog"><meta property="og:title" content="性能优化 (十一) 稳定运行优化之热修复原理探索"><meta property="og:url" content="http://yoursite.com/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%B8%80-%E7%A8%B3%E5%AE%9A%E8%BF%90%E8%A1%8C%E4%BC%98%E5%8C%96%E4%B9%8B%E7%83%AD%E4%BF%AE%E5%A4%8D%E5%8E%9F%E7%90%86%E6%8E%A2%E7%B4%A2/"><meta property="og:site_name" content="DevYK 个人博客"><meta property="og:description" content="完整代码传送阵  热修复的由来 刚发布的版本出现了严重的 bug ,需要开发者去解决 bug，然后在测试打包重新发布，这会耗费大量的人力，物力，代价比较大。 如果当前的 bug 不影响用户使用也不会崩溃，但是了下个版本是大版本，那么两个版本之间间隔时间会很长，这样要等到下个大版本发布在修复 bug , 而之前版本的 bug 还存在，虽说不影响使用，但是是一个潜在的 bug。 版本升级率不高，并且需"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://cdn.sinaimg.cn.52ecy.cn/large/005BYqpgly1g3uy0kddqzg309o0m44il.jpg"><meta property="og:image" content="https://cdn.sinaimg.cn.52ecy.cn/large/005BYqpgly1g3ux01nqtgj315t0ijjtf.jpg"><meta property="og:image" content="https://cdn.sinaimg.cn.52ecy.cn/large/005BYqpgly1g3v0ag358rj30v50dngmf.jpg"><meta property="og:image" content="https://cdn.sinaimg.cn.52ecy.cn/large/005BYqpgly1g3v1ssopsqj30tm0jl3ze.jpg"><meta property="article:published_time" content="2020-06-04T16:29:00.000Z"><meta property="article:modified_time" content="2020-06-04T16:34:22.559Z"><meta property="article:author" content="DevYK"><meta property="article:tag" content="性能优化"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="https://cdn.sinaimg.cn.52ecy.cn/large/005BYqpgly1g3uy0kddqzg309o0m44il.jpg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%B8%80-%E7%A8%B3%E5%AE%9A%E8%BF%90%E8%A1%8C%E4%BC%98%E5%8C%96%E4%B9%8B%E7%83%AD%E4%BF%AE%E5%A4%8D%E5%8E%9F%E7%90%86%E6%8E%A2%E7%B4%A2/"},"headline":"DevYK 个人博客","image":["https://cdn.sinaimg.cn.52ecy.cn/large/005BYqpgly1g3uy0kddqzg309o0m44il.jpg","https://cdn.sinaimg.cn.52ecy.cn/large/005BYqpgly1g3ux01nqtgj315t0ijjtf.jpg","https://cdn.sinaimg.cn.52ecy.cn/large/005BYqpgly1g3v0ag358rj30v50dngmf.jpg","https://cdn.sinaimg.cn.52ecy.cn/large/005BYqpgly1g3v1ssopsqj30tm0jl3ze.jpg"],"datePublished":"2020-06-04T16:29:00.000Z","dateModified":"2020-06-04T16:34:22.559Z","author":{"@type":"Person","name":"DevYK"},"description":"完整代码传送阵  热修复的由来 刚发布的版本出现了严重的 bug ,需要开发者去解决 bug，然后在测试打包重新发布，这会耗费大量的人力，物力，代价比较大。 如果当前的 bug 不影响用户使用也不会崩溃，但是了下个版本是大版本，那么两个版本之间间隔时间会很长，这样要等到下个大版本发布在修复 bug , 而之前版本的 bug 还存在，虽说不影响使用，但是是一个潜在的 bug。 版本升级率不高，并且需"}</script><link rel="canonical" href="http://yoursite.com/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%B8%80-%E7%A8%B3%E5%AE%9A%E8%BF%90%E8%A1%8C%E4%BC%98%E5%8C%96%E4%B9%8B%E7%83%AD%E4%BF%AE%E5%A4%8D%E5%8E%9F%E7%90%86%E6%8E%A2%E7%B4%A2/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" defer></script><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="DevYK 个人博客" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta size-small is-uppercase level is-mobile"><div class="level-left"><time class="level-item" dateTime="2020-06-04T16:29:00.000Z" title="2020-06-04T16:29:00.000Z">2020-06-05</time><span class="level-item"> DevYK </span><span class="level-item"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a><span> / </span><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></span><span class="level-item">13 分钟 读完 (大约 1951 个字)</span><span class="level-item" id="busuanzi_container_page_pv"><i class="far fa-eye"></i>&nbsp;&nbsp;<span id="busuanzi_value_page_pv">0</span>次访问</span></div></div><h1 class="title is-3 is-size-4-mobile">性能优化 (十一) 稳定运行优化之热修复原理探索</h1><div class="content"><p><a href="https://github.com/yangkun19921001/hotfix">完整代码传送阵</a></p>
+<p><img src="https://cdn.sinaimg.cn.52ecy.cn/large/005BYqpgly1g3uy0kddqzg309o0m44il.jpg" alt=""></p>
+<h2 id="热修复的由来"><a href="#热修复的由来" class="headerlink" title="热修复的由来"></a>热修复的由来</h2><ul>
+<li>刚发布的版本出现了严重的 bug ,需要开发者去解决 bug，然后在测试打包重新发布，这会耗费大量的人力，物力，代价比较大。</li>
+<li>如果当前的 bug 不影响用户使用也不会崩溃，但是了下个版本是大版本，那么两个版本之间间隔时间会很长，这样要等到下个大版本发布在修复 bug , 而之前版本的 bug 还存在，虽说不影响使用，但是是一个潜在的 bug。</li>
+<li>版本升级率不高，并且需要长时间来完成版本迭代，前版本的 bug 就会一直影响不升级的用户。</li>
+<li>有一些小但是很重要的功能需要在短时间内完成版本迭代，如果假日活动。</li>
+</ul>
+<p>..等等, 这里只是拿几个常见的举例说明。</p>
+<a id="more"></a>
+
+<h2 id="热修复的效率"><a href="#热修复的效率" class="headerlink" title="热修复的效率"></a>热修复的效率</h2><p><img src="https://cdn.sinaimg.cn.52ecy.cn/large/005BYqpgly1g3ux01nqtgj315t0ijjtf.jpg" alt=""></p>
+<h2 id="热修复框架对比"><a href="#热修复框架对比" class="headerlink" title="热修复框架对比"></a>热修复框架对比</h2><table>
+<thead>
+<tr>
+<th>框架名称</th>
+<th>所属公司</th>
+<th>是否开源</th>
+<th>修复方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Dexposed</td>
+<td>alibaba</td>
+<td>开源</td>
+<td>实时修复</td>
+</tr>
+<tr>
+<td>Andfix</td>
+<td>alibaba</td>
+<td>开源</td>
+<td>实时修复</td>
+</tr>
+<tr>
+<td>Hotfix</td>
+<td>alibaba</td>
+<td>暂未开源</td>
+<td>实时修复</td>
+</tr>
+<tr>
+<td>Qzone 超级补丁</td>
+<td>QQ 空间</td>
+<td>暂未开源</td>
+<td>冷启动修复</td>
+</tr>
+<tr>
+<td>QFix</td>
+<td>手 Q 团队</td>
+<td>开源</td>
+<td>冷启动修复</td>
+</tr>
+<tr>
+<td>Robust</td>
+<td>美团</td>
+<td>开源</td>
+<td>实时修复</td>
+</tr>
+<tr>
+<td>Nuwa</td>
+<td>大众点评</td>
+<td>开源</td>
+<td>冷启动修复</td>
+</tr>
+<tr>
+<td>RocooFix</td>
+<td>百度金融</td>
+<td>开源</td>
+<td>冷启动修复</td>
+</tr>
+<tr>
+<td>Aceso</td>
+<td>美丽说蘑菇街</td>
+<td>开源</td>
+<td>实时修复</td>
+</tr>
+<tr>
+<td>Amigo</td>
+<td>饿了么</td>
+<td>开源</td>
+<td>冷启动修复</td>
+</tr>
+<tr>
+<td>Tinker</td>
+<td>微信</td>
+<td>开源</td>
+<td>冷启动修复</td>
+</tr>
+<tr>
+<td>Sophix</td>
+<td>alibaba</td>
+<td>未开源</td>
+<td>实时修复 + 冷启动修复</td>
+</tr>
+</tbody></table>
+<h2 id="代码修复（今日主题-类加载方式）"><a href="#代码修复（今日主题-类加载方式）" class="headerlink" title="代码修复（今日主题 - 类加载方式）"></a>代码修复（今日主题 - 类加载方式）</h2><h3 id="底层替换方式"><a href="#底层替换方式" class="headerlink" title="底层替换方式"></a>底层替换方式</h3><ul>
+<li>在已加载的类中直接替换原有方法，是在原有类的基础上进行修改，无法实现对原有类进行方法和字段的增减，这样会破坏原有类的结构。</li>
+<li>不稳定。直接修改 JVM 方法实体的具体字段来实现的。Android 是开源的，不同的手机厂商开源对代码进行修改，所以像 Andfix 就会出现在部分机型上的修复失败的现象。</li>
+</ul>
+<h3 id="ClassLoader-类加载方式"><a href="#ClassLoader-类加载方式" class="headerlink" title="ClassLoader 类加载方式"></a>ClassLoader 类加载方式</h3><ul>
+<li><p>APP 重新启动后，让 ClassLoader 去加载新的类。</p>
+</li>
+<li><p>class 暂未被加载到系统中，收到推送利用<strong>插桩原理</strong>让 ClassLoader 优先加载修复好的 dex 。</p>
+</li>
+</ul>
+<h2 id="实现自己的热修复框架"><a href="#实现自己的热修复框架" class="headerlink" title="实现自己的热修复框架"></a>实现自己的热修复框架</h2><h3 id="Dex-分包"><a href="#Dex-分包" class="headerlink" title="Dex 分包"></a>Dex 分包</h3><p><strong>65536 限制</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">com.android.dex.DexIndexOverflowException: method ID not in [<span class="number">0</span>, <span class="number">0xffff</span>]: <span class="number">65536</span></span><br></pre></td></tr></table></figure>
+
+<p>当应用程序报 65536 错误的根本原因是，应用的方法数量超过了最大数 65536 个，因为 DVM Bytecode 的限制， DVM 指令集的方法调用指令 invoke-kind 索引为 16 bits, 最多能引用 65535 个方法</p>
+<p><strong>LinearAlloc 限制</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">INSTALL_FAILED_DEXOPT</span><br></pre></td></tr></table></figure>
+
+<p>在安装应用时可能会提示 上面的错误，产生的原因是 LinearAlloc 限制。 DVM 中的 LinearAlloc 是一个固定的缓存区，当方法数超出缓存区的大小时会报错。</p>
+<p><strong>解决</strong></p>
+<p>为了解决 65536 限制和 LinearAlloc 限制，从而产生了 Dex 分包机制。<br>Dex 分包方案主要做的时在打包时将应用代码分成多个 Dex，将应用启动时必须用到的类和这些类的直接引用类放到主 Dex 中，其它代码放到次 Dex 中。当应用启动时先加载主 Dex，等到应用启动后再动态地加载次Dex，从而缓解了主 Dex 的 65536 限制和 LinearAlloc 限制</p>
+<ul>
+<li><p>gradle 配置</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion <span class="number">26</span></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId <span class="string">"com.ykun.hotfix"</span></span><br><span class="line">        minSdkVersion <span class="number">15</span></span><br><span class="line">        targetSdkVersion <span class="number">26</span></span><br><span class="line">        versionCode <span class="number">1</span></span><br><span class="line">        versionName <span class="string">"1.0"</span></span><br><span class="line">        testInstrumentationRunner <span class="string">"android.support.test.runner.AndroidJUnitRunner"</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 开启分包</span></span><br><span class="line">        multiDexEnabled <span class="keyword">true</span></span><br><span class="line">        <span class="comment">// 设置分包配置文件</span></span><br><span class="line">        <span class="function">multiDexKeepFile <span class="title">file</span><span class="params">(<span class="string">'multidex.keep'</span>)</span></span></span><br><span class="line"><span class="function">    &#125;</span></span><br><span class="line"><span class="function">    dexOptions </span>&#123;</span><br><span class="line">        javaMaxHeapSize <span class="string">"4g"</span></span><br><span class="line">        preDexLibraries = <span class="keyword">false</span></span><br><span class="line">        additionalParameters = [ <span class="comment">// 配置multidex参数</span></span><br><span class="line">                                 <span class="string">'--multi-dex'</span>, <span class="comment">// 多dex分包</span></span><br><span class="line">                                 <span class="string">'--set-max-idx-number=50000'</span>, <span class="comment">// 每个包内方法数上限</span></span><br><span class="line">                                 <span class="string">'--main-dex-list='</span> + <span class="string">'/multidex.keep'</span>, <span class="comment">// 打包到主classes.dex的文件列表</span></span><br><span class="line">                                 <span class="string">'--minimal-main-dex'</span></span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置 multidex.keep 将指定的 class 放入 class.dex 中</p>
+<p>格式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//参考</span></span><br><span class="line">com/ykun/hotfix/BaseActivity<span class="class">.<span class="keyword">class</span></span></span><br><span class="line"><span class="class"><span class="title">com</span>/<span class="title">ykun</span>/<span class="title">hotfix</span>/<span class="title">BaseApplication</span>.<span class="title">class</span></span></span><br><span class="line"><span class="class"><span class="title">com</span>/<span class="title">ykun</span>/<span class="title">hotfix</span>/<span class="title">MainActivity</span>.<span class="title">class</span></span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>效果</p>
+<p><img src="https://cdn.sinaimg.cn.52ecy.cn/large/005BYqpgly1g3v0ag358rj30v50dngmf.jpg" alt=""></p>
+</li>
+</ul>
+<h3 id="什么是插桩？"><a href="#什么是插桩？" class="headerlink" title="什么是插桩？"></a>什么是插桩？</h3><p><img src="https://cdn.sinaimg.cn.52ecy.cn/large/005BYqpgly1g3v1ssopsqj30tm0jl3ze.jpg" alt=""></p>
+<p>源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**遍历需要找到需要加载的 class */</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> Class <span class="title">findClass</span><span class="params">(String name, List&lt;Throwable&gt; suppressed)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (Element element : dexElements) &#123;</span><br><span class="line">            DexFile dex = element.dexFile;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (dex != <span class="keyword">null</span>) &#123;</span><br><span class="line">                Class clazz = dex.loadClassBinaryName(name, definingContext, suppressed);</span><br><span class="line">                <span class="keyword">if</span> (clazz != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">return</span> clazz;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (dexElementsSuppressedExceptions != <span class="keyword">null</span>) &#123;</span><br><span class="line">            suppressed.addAll(Arrays.asList(dexElementsSuppressedExceptions));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>插桩原理：</p>
+<p>通过源码得知 findClass 是通过遍历 dexElements  来找到 class, 如果我们反射得到 DexPathList 的私有数组 dexElements，我们外部改变这个数组内部顺序索引，将修复好的 dex 放入 [0] 的位置，那么是不是能够优先使用修复好的 dex 勒？ 很明显，是成立的。下面开始撸代码吧。 </p>
+<h3 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h3><ol>
+<li><p>接收来至服务器发来的补丁包，如果修复包已经存在则删除，copy 到私有目录防止用户不小心删除。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**这里模拟已经下载好的 dex 补丁包*/</span>    </span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">downloadPatch</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//1 从服务器下载dex文件 比如v1.1修复包文件（classes2.dex）</span></span><br><span class="line">        File sourceFile = <span class="keyword">new</span> File(Environment.getExternalStorageDirectory(), <span class="string">"classes2.dex"</span>);</span><br><span class="line">        <span class="comment">// 目标路径：私有目录</span></span><br><span class="line">        <span class="comment">//getDir("odex", Context.MODE_PRIVATE) data/user/0/包名/app_odex</span></span><br><span class="line">        File targetFile = <span class="keyword">new</span> File(getDir(<span class="string">"hotfix"</span>,</span><br><span class="line">                Context.MODE_PRIVATE).getAbsolutePath() + File.separator + <span class="string">"classes2.dex"</span>);</span><br><span class="line">        <span class="keyword">if</span> (targetFile.exists()) &#123;</span><br><span class="line">            targetFile.delete();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 复制dex到私有目录</span></span><br><span class="line">            FileUtils.copyFile(sourceFile, targetFile);</span><br><span class="line">            Toast.makeText(<span class="keyword">this</span>, <span class="string">"Bug 修复成功!"</span>, Toast.LENGTH_SHORT).show();</span><br><span class="line">            FixDexUtils.loadFixedDex(<span class="keyword">this</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>创建修复包的类加载器 DexClassLoader (通过源码得知是继承的 BaseDexClassLoader)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 创建类加载器</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> context</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> fileDir</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">createDexClassLoader</span><span class="params">(Context context, File fileDir)</span> </span>&#123;</span><br><span class="line">    String optimizedDirectory = fileDir.getAbsolutePath() + File.separator + <span class="string">"opt_dex"</span>;</span><br><span class="line">    File fOpt = <span class="keyword">new</span> File(optimizedDirectory);</span><br><span class="line">    <span class="keyword">if</span> (!fOpt.exists()) &#123;</span><br><span class="line">        fOpt.mkdirs();</span><br><span class="line">    &#125;</span><br><span class="line">    DexClassLoader classLoader;</span><br><span class="line">    <span class="keyword">for</span> (File dex : loadedDex) &#123;</span><br><span class="line">        <span class="comment">//初始化类加载器</span></span><br><span class="line">        classLoader = <span class="keyword">new</span> DexClassLoader(dex.getAbsolutePath(), optimizedDirectory, <span class="keyword">null</span>,</span><br><span class="line">                context.getClassLoader());</span><br><span class="line">        <span class="comment">//热修复</span></span><br><span class="line">        hotFix(classLoader, context);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>获取系统的 PathClassLoader</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PathClassLoader pathClassLoader = (PathClassLoader) context.getClassLoader();</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+<ol start="4">
+<li><p>获取修复包的 dexElements </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Object pathList = ReflectUtils.reflect(myClassLoader).field(<span class="string">"pathList"</span>).get();</span><br><span class="line">Object myDexElements = ReflectUtils.reflect(pathList).field(<span class="string">"dexElements"</span>).get();</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+<ol start="5">
+<li><p>获取系统的 dexElements</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Object sysPathList = ReflectUtils.reflect(pathClassLoader).field(<span class="string">"pathList"</span>).get();</span><br><span class="line">Object sysDexElements = ReflectUtils.reflect(sysPathList).field(<span class="string">"dexElements"</span>).get();</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+<ol start="6">
+<li><p>将系统的 dexElements 和 修复包的 dexElements merge 成新的 dexElements</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 合并，这里利用插桩原理进行合并数组，将修复好的 class2.dex 放入第一位，优先加入就行了</span></span><br><span class="line">Object dexElements = ArrayUtils.combineArray(myDexElements, sysDexElements);</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+<ol start="7">
+<li><p>重新赋值给 DexPathList 的 dexElements 属性</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//重新赋值</span></span><br><span class="line">ReflectUtils.reflect(sysPathList).field(<span class="string">"dexElements"</span>, dexElements);</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h2 id="热修复未来发展如果"><a href="#热修复未来发展如果" class="headerlink" title="热修复未来发展如果"></a>热修复未来发展如果</h2><ol>
+<li><p>热修复 = “黑科技”？</p>
+<ul>
+<li><p>热修复不同于国内 APP 进程保活这种 “黑科技”，让 app 常驻后台，既耗电又占用内存，浪费很多手机资源。还有 APP 的推送服务，无节操地对用户进行信息轰炸。还有更无节操的全家桶 app。导致 Android手机卡顿不堪，这些所谓的 “黑科技” 都是为了手机厂商的利益而损害用户的体验。</p>
+</li>
+<li><p>而热修复是能够让开发者和用户双赢的。不仅厂商能快速迭代更新 app，使功能尽快上线，而且热更新过程用户无感知，节省大量更新时间，提高用户体验。更重要的能保证 app 的功能稳定，bug 能及时修复。</p>
+</li>
+</ul>
+</li>
+</ol>
+<ol start="2">
+<li><p>IOS 封杀了热修复功能，Android 的热修复也会被 sha 掉吗？</p>
+<ul>
+<li><p>google 和 apple 公司在中国的地位不一样</p>
+</li>
+<li><p>Android 和 IOS 的开放性不同</p>
+</li>
+</ul>
+</li>
+</ol>
+<ol start="3">
+<li>热修复未来是十分乐观的，不仅不会受到封杀，反而会有很大发展空间</li>
+</ol>
+</div><div class="article-tags size-small mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></div><!--!--></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button is-info donate"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200604150710.jpeg" alt="支付宝"></span></a><a class="button donate" href="/" style="background-color:rgba(255,128,62,.87);border-color:transparent;color:white;" target="_blank" rel="noopener"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button is-danger donate" href="/" target="_blank" rel="noopener"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><a class="button is-success donate"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200604150835.png" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%BA%8C-%E4%BD%93%E7%A7%AF%E4%BC%98%E5%8C%96%E4%B9%8B%E6%9E%81%E9%99%90%E7%98%A6%E8%BA%AB/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">性能优化 (十二) 体积优化之极限瘦身</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81-%E6%8C%81%E7%BB%AD%E8%BF%90%E8%A1%8C%E4%BC%98%E5%8C%96%E4%B9%8B%E8%BF%9B%E7%A8%8B%E4%BF%9D%E6%B4%BB%E5%AE%9E%E7%8E%B0/"><span class="level-item">性能优化 (十) 稳定运行优化之进程保活实现 </span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="content" id="valine-thread"></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script>new Valine({
+            el: '#valine-thread' ,
+            appId: "j16d0HiTJvVWRQzjQN625f4W-gzGzoHsz",
+            appKey: "7cgla0UfvddS9PjRz7Lcvqn7",
+            placeholder: "请遵守中华人民共和国法律法规。填写邮箱信息以接收回复。",
+            avatar: "mm",
+            
+            meta: ["nick","mail","link"],
+            pageSize: 10,
+            lang: "zh-CN",
+            
+            highlight: true,
+            
+            
+            
+            
+            
+            requiredFields: [],
+        });</script></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar is-rounded" src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200427113132.jpeg" alt="DevYK"></figure><p class="title is-size-4 is-block line-height-inherit">DevYK</p><p class="is-size-6 is-block">Android/NDK/音视频/跨平台</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>BeiJing</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">28</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">7</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">4</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/yangkun19921001" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/yangkun19921001"><i class="fab fa-github"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="QQ" href="http://wpa.qq.com/msgrd?v=1&amp;uin=919079498&amp;site=ioshenmue&amp;menu=yes"><i class="fab fa-qq"></i></a></div></div></div><!--!--><div class="card widget"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile is-mobile" href="https://github.com/yangkun19921001/Blog/blob/master/about.md" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">联系我</span></span><span class="level-right"><span class="level-item tag">github.com</span></span></a></li><li><a class="level is-mobile is-mobile" href="https://juejin.im/user/578259398ac2470061f3a3fb/posts" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">掘金</span></span><span class="level-right"><span class="level-item tag">juejin.im</span></span></a></li></ul></div></div></div><div class="card widget"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile is-marginless" href="/categories/README/"><span class="level-start"><span class="level-item">README</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile is-marginless" href="/categories/%E4%B8%93%E9%A2%98/"><span class="level-start"><span class="level-item">专题</span></span><span class="level-end"><span class="level-item tag">25</span></span></a><ul class="mr-0"><li><a class="level is-mobile is-marginless" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"><span class="level-start"><span class="level-item">性能优化</span></span><span class="level-end"><span class="level-item tag">13</span></span></a></li><li><a class="level is-mobile is-marginless" href="/categories/%E4%B8%93%E9%A2%98/%E9%9F%B3%E8%A7%86%E9%A2%91/"><span class="level-start"><span class="level-item">音视频</span></span><span class="level-end"><span class="level-item tag">11</span></span></a></li></ul></li><li><a class="level is-mobile is-marginless" href="/categories/%E6%9C%8D%E5%8A%A1/"><span class="level-start"><span class="level-item">服务</span></span><span class="level-end"><span class="level-item tag">2</span></span></a><ul class="mr-0"><li><a class="level is-mobile is-marginless" href="/categories/%E6%9C%8D%E5%8A%A1/apprtc/"><span class="level-start"><span class="level-item">apprtc</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile is-marginless" href="/categories/%E6%9C%8D%E5%8A%A1/nginx/"><span class="level-start"><span class="level-item">nginx</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li></ul></div></div></div><div class="card widget"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile is-marginless" href="/archives/2020/06/"><span class="level-start"><span class="level-item">六月 2020</span></span><span class="level-end"><span class="level-item tag">28</span></span></a></li></ul></div></div></div><div class="card widget"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/webrtc/"><span class="tag">webrtc</span><span class="tag is-grey-lightest">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%85%B3%E4%BA%8E%E6%88%91/"><span class="tag">关于我</span><span class="tag is-grey-lightest">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"><span class="tag">性能优化</span><span class="tag is-grey-lightest">14</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/"><span class="tag">音视频学习路线</span><span class="tag is-grey-lightest">12</span></a></div></div></div></div></div><div class="column-right-shadow is-hidden-widescreen"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3"><div class="card widget"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-05T05:26:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/about/">README</a></p><p class="is-uppercase"><a class="link-muted" href="/categories/README/">README</a></p></div></article><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-04T16:33:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/%E5%BF%85%E7%9C%8B%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%80%BB%E7%BB%93/">必看的性能优化总结</a></p><p class="is-uppercase"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a> / <a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></p></div></article><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-04T16:31:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%B8%89-%E7%A8%B3%E5%AE%9A%E8%BF%90%E8%A1%8C%E4%BC%98%E5%8C%96%E4%B9%8B%E6%8D%95%E8%8E%B7-Native-Crash/">性能优化 (十三) 稳定运行优化之捕获 Native Crash </a></p><p class="is-uppercase"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a> / <a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></p></div></article><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-04T16:30:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%BA%8C-%E4%BD%93%E7%A7%AF%E4%BC%98%E5%8C%96%E4%B9%8B%E6%9E%81%E9%99%90%E7%98%A6%E8%BA%AB/">性能优化 (十二) 体积优化之极限瘦身</a></p><p class="is-uppercase"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a> / <a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></p></div></article><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-04T16:29:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%B8%80-%E7%A8%B3%E5%AE%9A%E8%BF%90%E8%A1%8C%E4%BC%98%E5%8C%96%E4%B9%8B%E7%83%AD%E4%BF%AE%E5%A4%8D%E5%8E%9F%E7%90%86%E6%8E%A2%E7%B4%A2/">性能优化 (十一) 稳定运行优化之热修复原理探索</a></p><p class="is-uppercase"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a> / <a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></p></div></article></div></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="DevYK 个人博客" height="28"></a><p class="size-small"><span>&copy; 2020 DevYK</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a><br><a href="http://www.beian.miit.gov.cn">京ICP备19052442号-1</a><br><span id="busuanzi_container_site_uv">共<span id="busuanzi_value_site_uv">0</span>个访客</span></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            site: {
+                url: 'http://yoursite.com',
+                external_link: {"enable":true,"exclude":[]}
+            },
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>

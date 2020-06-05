@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="generator" content="Hexo 4.2.1"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>性能优化 (六) 电量优化 - DevYK 个人博客</title><meta description="电量优化 - battery-historian简介现在基本上都是人手一部智能手机，你可以发现不管走在街上，公交地铁上，等等任何娱乐办公地方，随处可见有人正在低着头玩手机，有的还随身携带充电宝。由此可见，现在智能手机的电量有多么的不经用，当然我们是优化不了电池的，不过我们可以从 APP 中着手优化，我相信一线大厂也有自己电量分析工具，我相信只要是能够分析电量的工具，都是好工具 (^▽^)。那么该我"><meta property="og:type" content="blog"><meta property="og:title" content="性能优化 (六) 电量优化"><meta property="og:url" content="http://yoursite.com/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%85%AD-%E7%94%B5%E9%87%8F%E4%BC%98%E5%8C%96/"><meta property="og:site_name" content="DevYK 个人博客"><meta property="og:description" content="电量优化 - battery-historian简介现在基本上都是人手一部智能手机，你可以发现不管走在街上，公交地铁上，等等任何娱乐办公地方，随处可见有人正在低着头玩手机，有的还随身携带充电宝。由此可见，现在智能手机的电量有多么的不经用，当然我们是优化不了电池的，不过我们可以从 APP 中着手优化，我相信一线大厂也有自己电量分析工具，我相信只要是能够分析电量的工具，都是好工具 (^▽^)。那么该我"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4e19f57d102?w=949&amp;h=755&amp;f=jpeg&amp;s=138917"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4ddf283bd7d?w=1160&amp;h=490&amp;f=jpeg&amp;s=113253"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee494ff6ab1a1?w=492&amp;h=386&amp;f=png&amp;s=26120"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee494fedc3a4e?w=494&amp;h=383&amp;f=png&amp;s=14713"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee494ffeae922?w=495&amp;h=387&amp;f=png&amp;s=22252"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4d9f1ae2f34?w=1079&amp;h=723&amp;f=gif&amp;s=710866"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4d682e7de15?w=993&amp;h=519&amp;f=jpeg&amp;s=35037"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4952f1d209e?w=554&amp;h=332&amp;f=png&amp;s=94398"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4952821c846?w=499&amp;h=429&amp;f=png&amp;s=55820"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4956fd99047?w=499&amp;h=429&amp;f=png&amp;s=55072"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee495965e9d16?w=499&amp;h=429&amp;f=png&amp;s=59673"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4d1bd2e1411?w=541&amp;h=570&amp;f=jpeg&amp;s=126048"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4ccbc5d3aa8?w=993&amp;h=519&amp;f=jpeg&amp;s=34615"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4c7cbbb4f24?w=993&amp;h=839&amp;f=jpeg&amp;s=51452"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4c521437138?w=993&amp;h=839&amp;f=jpeg&amp;s=215213"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4b9559587af?w=1920&amp;h=671&amp;f=jpeg&amp;s=64814"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200325165646.jpg"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4bbf1ab494c?w=993&amp;h=519&amp;f=jpeg&amp;s=114927"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4b9559587af?w=1920&amp;h=671&amp;f=jpeg&amp;s=64814"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4b4cea10338?w=1922&amp;h=981&amp;f=gif&amp;s=2693008"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4ac9b7cbad2?w=1184&amp;h=891&amp;f=jpeg&amp;s=170951"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4a9f1c0e8c7?w=1174&amp;h=655&amp;f=jpeg&amp;s=94719"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4a6be4f9b80?w=397&amp;h=796&amp;f=jpeg&amp;s=22599"><meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee49fdc5c6f9a?w=1909&amp;h=897&amp;f=gif&amp;s=3686897"><meta property="og:image" content="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200325180127.png"><meta property="article:published_time" content="2020-06-04T16:19:00.000Z"><meta property="article:modified_time" content="2020-06-04T16:20:32.798Z"><meta property="article:author" content="DevYK"><meta property="article:tag" content="性能优化"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="https://user-gold-cdn.xitu.io/2019/5/25/16aee4e19f57d102?w=949&amp;h=755&amp;f=jpeg&amp;s=138917"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://yoursite.com/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%85%AD-%E7%94%B5%E9%87%8F%E4%BC%98%E5%8C%96/"},"headline":"DevYK 个人博客","image":["https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200325165646.jpg","https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200325180127.png"],"datePublished":"2020-06-04T16:19:00.000Z","dateModified":"2020-06-04T16:20:32.798Z","author":{"@type":"Person","name":"DevYK"},"description":"电量优化 - battery-historian简介现在基本上都是人手一部智能手机，你可以发现不管走在街上，公交地铁上，等等任何娱乐办公地方，随处可见有人正在低着头玩手机，有的还随身携带充电宝。由此可见，现在智能手机的电量有多么的不经用，当然我们是优化不了电池的，不过我们可以从 APP 中着手优化，我相信一线大厂也有自己电量分析工具，我相信只要是能够分析电量的工具，都是好工具 (^▽^)。那么该我"}</script><link rel="canonical" href="http://yoursite.com/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%85%AD-%E7%94%B5%E9%87%8F%E4%BC%98%E5%8C%96/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" defer></script><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css"><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="DevYK 个人博客" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta size-small is-uppercase level is-mobile"><div class="level-left"><time class="level-item" dateTime="2020-06-04T16:19:00.000Z" title="2020-06-04T16:19:00.000Z">2020-06-05</time><span class="level-item"> DevYK </span><span class="level-item"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a><span> / </span><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></span><span class="level-item">25 分钟 读完 (大约 3737 个字)</span><span class="level-item" id="busuanzi_container_page_pv"><i class="far fa-eye"></i>&nbsp;&nbsp;<span id="busuanzi_value_page_pv">0</span>次访问</span></div></div><h1 class="title is-3 is-size-4-mobile">性能优化 (六) 电量优化</h1><div class="content"><h2 id="电量优化-battery-historian"><a href="#电量优化-battery-historian" class="headerlink" title="电量优化 - battery-historian"></a>电量优化 - battery-historian</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>现在基本上都是人手一部智能手机，你可以发现不管走在街上，公交地铁上，等等任何娱乐办公地方，随处可见有人正在低着头玩手机，有的还随身携带充电宝。由此可见，现在智能手机的电量有多么的不经用，当然我们是优化不了电池的，不过我们可以从 APP 中着手优化，我相信一线大厂也有自己电量分析工具，我相信只要是能够分析电量的工具，都是好工具 (<em>^▽^</em>)。那么该我们的主角上场了 <a href="https://github.com/google/battery-historian">Google 开源电量分析工具 battery-historian</a> 下面就让我们一起来了解下 BatteryHistonian 吧！</p>
+<a id="more"></a>
+
+
+<h3 id="Battery-Historian"><a href="#Battery-Historian" class="headerlink" title="Battery-Historian"></a>Battery-Historian</h3><h4 id="Battery-Historian-背景"><a href="#Battery-Historian-背景" class="headerlink" title="Battery Historian 背景"></a>Battery Historian 背景</h4><p>Battery Historian 是在运行 Android 5.0 Lollipop（API级别21）及更高版本的 Android 设备上检查电池相关信息和事件的工具，而设备未插入。它允许应用程序开发人员在时间线上可视化系统和应用程序级事件通过平移和缩放功能，可以轻松查看自设备上次完全充电以来的各种汇总统计信息，并选择一个应用程序并检查影响所选应用程序特定电池的指标。 它还允许对两个错误报告进行A / B比较，突出显示关键电池相关指标的差异</p>
+<h4 id="Battery-Historian-安装"><a href="#Battery-Historian-安装" class="headerlink" title="Battery Historian 安装"></a>Battery Historian 安装</h4><p>Battery Historian 安装是一个复杂的工程，需要配置一大堆的环境。不过官方给咱们提供了 2 中安装方式，下面让我们一起来了解下吧。</p>
+<p><strong>快速安装 - 百度云</strong></p>
+<p><em>battery historian 源码及 JS 环境</em> ：<a href="https://pan.baidu.com/s/1D3Guq0WWhTSo7roBxFC-UA">https://pan.baidu.com/s/1D3Guq0WWhTSo7roBxFC-UA</a><br>提取码：g1cx </p>
+<p>使用方式：</p>
+<ol>
+<li>解压在 GO 的 $GOPATH/目录 执行 5.2 -&gt; 5.4 步骤 </li>
+<li>IE 浏览器 或者 Google 浏览器输入 <a href="http://localhost:9999/">http://localhost:9999/</a> </li>
+</ol>
+<h5 id="win10-源码安装-推荐"><a href="#win10-源码安装-推荐" class="headerlink" title="win10 源码安装 (推荐)"></a>win10 源码安装 (推荐)</h5><p>源码安装虽然配置的环境很多，但是用起来还是比较稳定，下面就跟我的步伐来一起安装吧。</p>
+<ol>
+<li><p>安装配置 GO 语言</p>
+<ol>
+<li><p><a href="https://golang.org/doc/install">科学上网下载</a> 或者 <a href="https://pan.baidu.com/s/1Mbu33vxwHHAHLq7Ma8Z-Og">使用我下载好的 提取码：nh8p</a></p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4e19f57d102?w=949&h=755&f=jpeg&s=138917" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4ddf283bd7d?w=1160&h=490&f=jpeg&s=113253" alt=""></p>
+</li>
+<li><p>安装 注意更改路径</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee494ff6ab1a1?w=492&h=386&f=png&s=26120" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee494fedc3a4e?w=494&h=383&f=png&s=14713" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee494ffeae922?w=495&h=387&f=png&s=22252" alt=""></p>
+</li>
+<li><p>配置环境</p>
+<p>系统变量中新建 GOROOT GOPATH 变量，然后配置 Path 环境变量</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4d9f1ae2f34?w=1079&h=723&f=gif&s=710866" alt=""></p>
+</li>
+</ol>
+</li>
+</ol>
+<ol start="4">
+<li><p>检查是否安装成功</p>
+<p>在 cmd 命令行中输入 go version 查看是否成功安装及当前版本</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4d682e7de15?w=993&h=519&f=jpeg&s=35037" alt=""></p>
+</li>
+</ol>
+<ol start="2">
+<li><p>python 安装</p>
+<p>由于 historian.py 脚本是 python2 写的，所以需要安装 python2.7 环境。</p>
+<p>下载安装: <a href="https://www.python.org/">https://www.python.org/</a></p>
+<p>云盘提供安装: <a href="https://pan.baidu.com/s/103GXARgc4vIUFgFlVKnrNg">https://pan.baidu.com/s/103GXARgc4vIUFgFlVKnrNg</a> 提取码：sm8p </p>
+<ol>
+<li><p>官网下载 2.7 版本</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4952f1d209e?w=554&h=332&f=png&s=94398" alt=""></p>
+</li>
+<li><p>安装 py</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4952821c846?w=499&h=429&f=png&s=55820" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4956fd99047?w=499&h=429&f=png&s=55072" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee495965e9d16?w=499&h=429&f=png&s=59673" alt=""></p>
+</li>
+<li><p>配置环境</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4d1bd2e1411?w=541&h=570&f=jpeg&s=126048" alt=""></p>
+</li>
+<li><p>检验 root 权限输入 python -V</p>
+<p>显示版本号，就说明安装成功了</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4ccbc5d3aa8?w=993&h=519&f=jpeg&s=34615" alt=""></p>
+</li>
+</ol>
+</li>
+<li><p>配置 JAVA 环境 </p>
+<p>这个就自己百度配置了哈。</p>
+</li>
+<li><p>配置 Git 环境</p>
+<p>这个也自己百度吧，很简单。</p>
+</li>
+<li><p>下载 <strong>Battery Historian</strong> 源码</p>
+<ol>
+<li><p>在 Git Bash 中输入命令  go get -d -u github.com/google/battery-historian/…（即下载到GOPATH配置目录下）</p>
+</li>
+<li><p>进入到$GOPATH/src/github.com/google/battery-historian目录下</p>
+</li>
+<li><p>运行 Battery Historian：输入命令行 go run setup.go</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4c7cbbb4f24?w=993&h=839&f=jpeg&s=51452" alt=""></p>
+</li>
+<li><p>运行 Battery Historian.go</p>
+<p><strong>在 battery-historian 目录下执行</strong> go run cmd/battery-historian/battery-historian.go</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4c521437138?w=993&h=839&f=jpeg&s=215213" alt=""></p>
+</li>
+<li><p>浏览器输入</p>
+<p><a href="http://localhost:9999/">http://localhost:9999</a></p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4b9559587af?w=1920&h=671&f=jpeg&s=64814" alt=""></p>
+</li>
+</ol>
+</li>
+</ol>
+<h5 id="MAC-源码安装-推荐"><a href="#MAC-源码安装-推荐" class="headerlink" title="MAC  源码安装(推荐)"></a>MAC  源码安装(推荐)</h5><p>安装步骤跟 win 一样，下面直接介绍 mac 下的 battery historian 需要的环境配置</p>
+<ol>
+<li><p>Go  环境配置</p>
+<ol>
+<li><p>vim .brash_profile 配置 go 环境</p>
+<p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200325165646.jpg" alt=""></p>
+</li>
+<li><p>保存编辑的环境</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sorce .brash_profile</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+</li>
+</ol>
+<h5 id="Docker-安装"><a href="#Docker-安装" class="headerlink" title="Docker 安装"></a>Docker 安装</h5><p>docker 我这里就粗略的说下，因为在 win10 下安装 坑太多了。还有点不稳定，导致最后使用 <em>源码安装</em>。</p>
+<p><strong>准备工作</strong></p>
+<p><strong>官网下载 Docker :</strong> <a href="https://docs.docker.com/engine/installation/">https://docs.docker.com/engine/installation/</a></p>
+<p><strong>win 10 家庭版本缺少 Hyper-V 组件需升级企业版密码钥匙也可以百度:</strong> NPPR9-FWDCX-D2C8J-H872K-2YT43 </p>
+<ol>
+<li><p>安装 Docker for Windows Installer 安装步骤直接下一步，安装过程中会出现自动重启电脑。</p>
+</li>
+<li><p>命令输入运行 docker</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name=battery -d -p <span class="number">9999</span>:<span class="number">9999</span> bhaavan/battery-historian</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4bbf1ab494c?w=993&h=519&f=jpeg&s=114927" alt=""></p>
+</li>
+<li><p>验证: 在浏览器上输入 <a href="http://localhost:9999/">http://localhost:9999</a></p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4b9559587af?w=1920&h=671&f=jpeg&s=64814" alt=""></p>
+</li>
+</ol>
+<p><strong>注意：</strong></p>
+<ol>
+<li><p>如果 win10 企业版安装失败，可以看看<a href="https://translate.googleusercontent.com/translate_c?depth=1&hl=zh-CN&prev=search&rurl=translate.google.com&sl=en&sp=nmt4&u=https://github.com/docker/for-win/issues/1263&xid=17259,15700023,15700186,15700190,15700256,15700259&usg=ALkJrhgz4h2dF1utlnoTgLQSC9FQwmUiWA">官网提示</a></p>
+</li>
+<li><p>如果升级了企业版 那么 VMware 虚拟机用不了，下面给出解决办法。</p>
+<ol>
+<li><p>关闭 Hyper-V 组件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcdedit /set hypervisorlaunchtype off</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>开启</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bcdedit /set hypervisorlaunchtype auto</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+</li>
+</ol>
+<h4 id="Battery-Historian-使用及数据分析"><a href="#Battery-Historian-使用及数据分析" class="headerlink" title="Battery Historian 使用及数据分析"></a>Battery Historian 使用及数据分析</h4><h5 id="adb-对手机的操作"><a href="#adb-对手机的操作" class="headerlink" title="adb 对手机的操作"></a>adb 对手机的操作</h5><ol>
+<li><p>重置内部数据，相当于清空</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys batterystats --reset</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>获取完整的 wakelock 信息</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">adb shell dumpsys batterystats --enable full-wake-history</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>拔掉 USB 等待一段时间建议长一点，现在随意使用 APP </p>
+</li>
+<li><p>获得电量报告</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// &gt; 6.0</span><br><span class="line">adb bugreport bugreport.zip</span><br><span class="line">// &lt;= 6.0</span><br><span class="line">adb bugreport &gt; bugreport.txt</span><br><span class="line"></span><br><span class="line">//导出</span><br><span class="line">adb pull /data/user_de/0/com.android.shell/files/bugreports/bugreport-ALP-AL00-HUAWEIALP-AL00-2020-03-25-16-39-20.zip [导出目录]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>提交电量报告，并查看</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4b4cea10338?w=1922&h=981&f=gif&s=2693008" alt=""></p>
+</li>
+</ol>
+<h5 id="数据参数详细说明"><a href="#数据参数详细说明" class="headerlink" title="数据参数详细说明"></a>数据参数详细说明</h5><ol>
+<li><p>WakeLock 级别</p>
+<ul>
+<li><p>PARTIAL_WAKE_LOCK: 保证 CPU 保持高性能运行，而屏幕和键盘背光（也可能是触摸按键的背光）关闭。一般情况下都会使用这个 WakeLock 。</p>
+</li>
+<li><p>ACQUIRE_CAUSES_WAKEUP: 这个WakeLock除了会使 CPU 高性能运行外还会导致屏幕亮起，即使屏幕原先处于关闭的状态下。</p>
+</li>
+<li><p>ON_AFTER_RELEASE: 如果释放 WakeLock 的时候屏幕处于亮着的状态，则在释放WakeLock 之后让屏幕再保持亮一小会。如果释放 WakeLock 的时候屏幕本身就没亮，则不会有动作。</p>
+</li>
+<li><p>API17 被弃用的 WakeLock：保持屏幕长亮</p>
+<ul>
+<li><pre><code class="java">SCREEN_DIM_WAKE_LOCK：保证屏幕亮起，但是亮度可能比较低。同时键盘背光也可以不亮。
+
+SCREEN_BRIGHT_WAKE_LOCK ：保证屏幕全亮，同时键盘背光也亮。
+
+FULL_WAKE_LOCK：表现和SCREEN_BRIGHT_WAKE_LOCK 类似，但是区别在于这个等级的WakeLock使用的是最高亮度
+&lt;!--￼<span class="number">7</span>--&gt;
+
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p>   <strong>剩下参数由表格说明</strong></p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CPU runing</td>
+<td>cpu 运行的状态, 是否被唤醒</td>
+</tr>
+<tr>
+<td>Kernel only uptime</td>
+<td>只有内核运行时间</td>
+</tr>
+<tr>
+<td>Activity Manager Proc</td>
+<td>活跃的用户进程</td>
+</tr>
+<tr>
+<td>Mobile network type</td>
+<td>网络类型</td>
+</tr>
+<tr>
+<td>Mobile radio active</td>
+<td>移动蜂窝信号 比 wiff 耗电</td>
+</tr>
+<tr>
+<td>Crashes(logcat)</td>
+<td>Crashes(logcat) 某个时间点出现 crash 的应用</td>
+</tr>
+<tr>
+<td>Doze</td>
+<td>是否进入doze 模式</td>
+</tr>
+<tr>
+<td>JobScheduler</td>
+<td>异步作业调度,延迟操作，父类 Service</td>
+</tr>
+<tr>
+<td>SyncManager</td>
+<td>同步操作</td>
+</tr>
+<tr>
+<td>Temp White List</td>
+<td>电量优化白名单</td>
+</tr>
+<tr>
+<td>Phone call</td>
+<td>是否打电话</td>
+</tr>
+<tr>
+<td>GPS</td>
+<td>是否使用 GPS</td>
+</tr>
+<tr>
+<td>Network connectivity</td>
+<td>网络连接状态 (wifi、mobile是否连接)</td>
+</tr>
+<tr>
+<td>Mobile signal strength</td>
+<td>移动信号强度 (great\good\moderate\poor)</td>
+</tr>
+<tr>
+<td>Wifi scan</td>
+<td>是否在扫描 wifi 信号</td>
+</tr>
+<tr>
+<td>Wifi supplicant</td>
+<td>是否有 wifi 请求</td>
+</tr>
+<tr>
+<td>Wifi radio</td>
+<td>是否正在通过 wifi 传输数据</td>
+</tr>
+<tr>
+<td>Wifi running</td>
+<td>wifi 组件是否在工作(未传输数据)</td>
+</tr>
+<tr>
+<td>Wifi on</td>
+<td>wifi 组件是否在工作(未传输数据)</td>
+</tr>
+<tr>
+<td>Audio</td>
+<td>音频是否开启</td>
+</tr>
+<tr>
+<td>Camera</td>
+<td>相机是否在工作</td>
+</tr>
+<tr>
+<td>Video</td>
+<td>是否在播放视频</td>
+</tr>
+<tr>
+<td>Foreground process</td>
+<td>前台进程</td>
+</tr>
+<tr>
+<td>Package install</td>
+<td>是否在进行包安装</td>
+</tr>
+<tr>
+<td>Package active</td>
+<td>包管理在工作</td>
+</tr>
+<tr>
+<td>Battery level</td>
+<td>电池当前电量</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>电池温度</td>
+</tr>
+<tr>
+<td>Logcat misc</td>
+<td>是否在导出日志</td>
+</tr>
+<tr>
+<td>Plugged</td>
+<td>是否是充电状态</td>
+</tr>
+</tbody></table>
+<h5 id="当前-APP-Stats"><a href="#当前-APP-Stats" class="headerlink" title="当前 APP Stats"></a>当前 APP Stats</h5><p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4ac9b7cbad2?w=1184&h=891&f=jpeg&s=170951" alt=""></p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4a9f1c0e8c7?w=1174&h=655&f=jpeg&s=94719" alt=""></p>
+<h5 id="分析当前-APP-电量详细信息"><a href="#分析当前-APP-电量详细信息" class="headerlink" title="分析当前 APP 电量详细信息"></a>分析当前 APP 电量详细信息</h5><ol>
+<li>从上图可以看出 早上 11:00 - 下午 12: 00 这一个小时内电量下降的最快，耗电量最多的罪魁祸首就是 <strong>GPS</strong> 和 <strong>wakelock</strong>  </li>
+<li>在 APP Stats -&gt; Device estimated power 中可以查看在这一小时耗电时常，（由上图 Battery Level 得知电量变化过程是 69  - 61 ，1h 下降 8 ）APP 1h 耗电为 5.38 % 还是挺耗电的。</li>
+</ol>
+<p><strong>当前 APP 优化建议:</strong></p>
+<p>GPS ：GPS 可以间断获取，或者使用第三方(高德、百度)它们提供省电模式定位，有 wiff 地方切换 wif 定位，少用 高精准定位模式。</p>
+<p>网络连接: 有 wiff 地方建议切换 wiff</p>
+<p>wakelock : 尽量不要使用。</p>
+<h4 id="总结-优化方案"><a href="#总结-优化方案" class="headerlink" title="总结-优化方案"></a>总结-优化方案</h4><h5 id="1-加入电量优化白名单"><a href="#1-加入电量优化白名单" class="headerlink" title="1. 加入电量优化白名单"></a>1. 加入电量优化白名单</h5><p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee4a6be4f9b80?w=397&h=796&f=jpeg&s=22599" alt=""></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 加入电量白名单</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> activity</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> type 1: 启动 设置页面 2：触发系统对话框</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">addWhite</span><span class="params">(Activity activity, <span class="keyword">int</span> type)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (activity == <span class="keyword">null</span>)<span class="keyword">return</span>;</span><br><span class="line">        WeakReference&lt;Activity&gt; activityWeakReference = <span class="keyword">new</span> WeakReference&lt;Activity&gt;(activity);</span><br><span class="line">        PowerManager packageManager = (PowerManager) activityWeakReference.get().getApplication()</span><br><span class="line">                .getSystemService(Context.POWER_SERVICE);</span><br><span class="line">        <span class="comment">//应用是否在 白名单中</span></span><br><span class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!packageManager.isIgnoringBatteryOptimizations(activityWeakReference.get().getApplication().getPackageName())) &#123;</span><br><span class="line">                <span class="keyword">if</span> (type == <span class="number">1</span>) &#123;</span><br><span class="line">                    <span class="comment">//方法1、启动一个  ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS Intent</span></span><br><span class="line">                    Intent intent = <span class="keyword">new</span> Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);</span><br><span class="line">                    activityWeakReference.get().getApplication().startActivity(intent);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">//方法2、触发系统对话框</span></span><br><span class="line">                    Intent intent = <span class="keyword">new</span> Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);</span><br><span class="line">                    intent.setData(Uri.parse(<span class="string">"package:"</span> + activityWeakReference.get().getApplication().getPackageName()));</span><br><span class="line">                    activityWeakReference.get().getApplication().startActivity(intent);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-GPS-优化建议"><a href="#2-GPS-优化建议" class="headerlink" title="2. GPS 优化建议"></a>2. GPS 优化建议</h5><p>定位是 App 中常用的功能，但是定位不能千篇一律，不同的场景以及不同类型的 App 对定位更加需要个性化的区分。</p>
+<ul>
+<li><p>选择合适的 Location Provider<br>Android系统支持多个 Location Provider：</p>
+<p>GPS_PROVIDER:<br>GPS 定位，利用 GPS 芯片通过卫星获得自己的位置信息。定位精准度高，一般在 10 米左右，耗电量大；但是在室内，GPS 定位基本没用。</p>
+<p>NETWORK_PROVIDER：<br>网络定位，利用手机基站和 WIFI 节点的地址来大致定位位置，这种定位方式取决于服务器，即取决于将基站或 WIFI 节点信息翻译成位置信息的服务器的能力。</p>
+<p>PASSIVE_PROVIDER:<br>被动定位，就是用现成的，当其他应用使用定位更新了定位信息，系统会保存下来，该应用接收到消息后直接读取就可以了。比如如果系统中已经安装了百度地图，高德地图(室内可以实现精确定位)，你只要使用它们定位过后，再使用这种方法在你的程序肯定是可以拿到比较精确的定位信息。</p>
+<p>使用 Criteria，设置合适的模式、功耗、海拔、速度等需求，系统会返回合适的 Location Provider。<br>例如你的 App 只是需要一个粗略的定位那么就不需要使用 GPS 进行定位，既耗费电量，定位的耗时也久。</p>
+</li>
+<li><p>及时注销定位监听<br>在获取到定位之后或者程序处于后台时，注销定位监听，此时监听GPS传感器相当于执行no-op（无操作指令），用户不会有感知但是却耗电。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//如果对定位要求不那么严格的话 可以在关闭屏幕的时候可以暂停 </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPause</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     <span class="keyword">super</span>.onPause();</span><br><span class="line">     <span class="keyword">if</span>(locationManager != <span class="keyword">null</span>)</span><br><span class="line">         locationManager.removeListener()</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>多模块使用定位尽量复用<br>多个模块使用定位，尽量复用上一次的结果，而不是都重新走定位的过程，节省电量损耗；例如：在应用启动的时候获取一次定位，保存结果，之后再用到定位的地方都直接去取。</p>
+</li>
+</ul>
+<h5 id="3-网络切换建议-上传下载尽量用-WIFI"><a href="#3-网络切换建议-上传下载尽量用-WIFI" class="headerlink" title="3.网络切换建议 上传下载尽量用 WIFI"></a>3.网络切换建议 上传下载尽量用 WIFI</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//优化方案 二 ：网络数据切换</span></span><br><span class="line">        <span class="keyword">if</span> (!BatteryUtils.isPlugged(getApplicationContext()))&#123;</span><br><span class="line">            <span class="comment">//如果没有充电，提醒用户是否有可用 wiff </span></span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-WakeLock-亮屏，唤醒-CPU-建议"><a href="#4-WakeLock-亮屏，唤醒-CPU-建议" class="headerlink" title="4. WakeLock 亮屏，唤醒 CPU 建议"></a>4. WakeLock 亮屏，唤醒 CPU 建议</h5><ol>
+<li><p>亮屏替换者</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//在Activity中： </span></span><br><span class="line">getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);</span><br><span class="line"></span><br><span class="line"><span class="comment">//或在布局中添加这个属性：</span></span><br><span class="line">android:keepScreenOn=<span class="string">"true"</span></span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+<ol start="2">
+<li><p>alarm 闹钟让 CPU 间断式工作</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 开启一个闹钟</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> context</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> action</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> requestId</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> interval</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">startTimer</span><span class="params">(Context context,String action,<span class="keyword">int</span> requestId,<span class="keyword">int</span> interval)</span> </span>&#123;</span><br><span class="line">    Intent intent = <span class="keyword">new</span> Intent(action);</span><br><span class="line">    PendingIntent sender = PendingIntent.getBroadcast(context, requestId, intent, PendingIntent.FLAG_CANCEL_CURRENT);</span><br><span class="line">   </span><br><span class="line">    AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);</span><br><span class="line">   </span><br><span class="line">    Calendar calendar = Calendar.getInstance();</span><br><span class="line">    <span class="keyword">int</span> second = calendar.get(Calendar.SECOND);</span><br><span class="line">    <span class="comment">//延迟一分钟执行</span></span><br><span class="line">    <span class="keyword">int</span> delay = <span class="number">60</span> - second + <span class="number">1</span>;</span><br><span class="line">    calendar.add(Calendar.SECOND, delay);</span><br><span class="line">    <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.KITKAT) &#123;</span><br><span class="line">        String format = <span class="keyword">new</span> SimpleDateFormat(<span class="string">"HH:mm:ss"</span>, Locale.CHINA).format(calendar.getTimeInMillis());</span><br><span class="line">        Log.d(<span class="string">"下次闹钟执行的时间--》"</span>,<span class="string">"delay: "</span> + delay +<span class="string">", startMillis: "</span> +format);</span><br><span class="line">        alarmManager.setWindow(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), <span class="number">100</span>, sender);</span><br><span class="line">   </span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval, sender);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h5 id="5-JobScheduler-Service-替代者。-8-0-以后-Google-推荐使用"><a href="#5-JobScheduler-Service-替代者。-8-0-以后-Google-推荐使用" class="headerlink" title="5. JobScheduler (Service 替代者。 8.0 以后 Google 推荐使用)"></a>5. JobScheduler (Service 替代者。 8.0 以后 Google 推荐使用)</h5><ol>
+<li><p>把工作任务放到合适的时间再去执行，比如充电时间，wifi 连接后</p>
+</li>
+<li><p>也可以把多个任务合并到一起，再选择时间去执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;需求 现在我需要在充电的状态下并且连接上 wiff 在上传 gps 数据</span><br><span class="line">&#x2F;&#x2F;jobScheduler 会自动把数据添加到一个队列中</span><br><span class="line">&#x2F;&#x2F;存入数据</span><br><span class="line">    @Override</span><br><span class="line">    public int enqueue(JobInfo job, JobWorkItem work) &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            return mBinder.enqueue(job, work);</span><br><span class="line">        &#125; catch (RemoteException e) &#123;</span><br><span class="line">            return JobScheduler.RESULT_FAILURE;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#x2F;&#x2F;在适当的时候取出所有数据</span><br><span class="line">    @Override</span><br><span class="line">    public List&lt;JobInfo&gt; getAllPendingJobs() &#123;</span><br><span class="line">        try &#123;</span><br><span class="line">            return mBinder.getAllPendingJobs();</span><br><span class="line">        &#125; catch (RemoteException e) &#123;</span><br><span class="line">            return null;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>也许有的对这个 jobSchedler 合并任务执行还不是那么清晰，现在看一个录屏</p>
+</li>
+<li><p>在充电并且连接 wiff 的状态下发送数据（这里旋转屏幕是为了发送数据用的）。</p>
+<ul>
+<li><p>先说一下演示流程 连接 wiff + 充电 正常发送数据  </p>
+</li>
+<li><p>关闭 wiff 发送数据，在打开 wiff 合并发送数据</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/5/25/16aee49fdc5c6f9a?w=1909&h=897&f=gif&s=3686897" alt=""></p>
+</li>
+</ul>
+</li>
+</ol>
+<p>到这里 咱们电量优化讲的差不多了 最后实际优化了 2% 下去。也还是不错的了。</p>
+<p><a href="https://github.com/yangkun19921001/battery">代码传送阵</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200325180127.png" alt=""></p>
+</div><div class="article-tags size-small mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></div><!--!--></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button is-info donate"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200604150710.jpeg" alt="支付宝"></span></a><a class="button donate" href="/" style="background-color:rgba(255,128,62,.87);border-color:transparent;color:white;" target="_blank" rel="noopener"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button is-danger donate" href="/" target="_blank" rel="noopener"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><a class="button is-success donate"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200604150835.png" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E4%B8%83-%E4%BD%93%E7%A7%AF%E4%BC%98%E5%8C%96%E4%B9%8B%E6%B7%B7%E6%B7%86%E6%8A%80%E6%9C%AF/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">性能优化 (七) 体积优化之混淆技术</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E4%BA%94-%E9%95%BF%E5%9B%BE%E4%BC%98%E5%8C%96/"><span class="level-item">性能优化 (五)  长图优化</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="content" id="valine-thread"></div><script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script><script src="https://cdn.jsdelivr.net/npm/valine@1.4.14/dist/Valine.min.js"></script><script>new Valine({
+            el: '#valine-thread' ,
+            appId: "j16d0HiTJvVWRQzjQN625f4W-gzGzoHsz",
+            appKey: "7cgla0UfvddS9PjRz7Lcvqn7",
+            placeholder: "请遵守中华人民共和国法律法规。填写邮箱信息以接收回复。",
+            avatar: "mm",
+            
+            meta: ["nick","mail","link"],
+            pageSize: 10,
+            lang: "zh-CN",
+            
+            highlight: true,
+            
+            
+            
+            
+            
+            requiredFields: [],
+        });</script></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar is-rounded" src="https://devyk.oss-cn-qingdao.aliyuncs.com/blog/20200427113132.jpeg" alt="DevYK"></figure><p class="title is-size-4 is-block line-height-inherit">DevYK</p><p class="is-size-6 is-block">Android/NDK/音视频/跨平台</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>BeiJing</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">28</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">7</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">4</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/yangkun19921001" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/yangkun19921001"><i class="fab fa-github"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="QQ" href="http://wpa.qq.com/msgrd?v=1&amp;uin=919079498&amp;site=ioshenmue&amp;menu=yes"><i class="fab fa-qq"></i></a></div></div></div><!--!--><div class="card widget"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile is-mobile" href="https://github.com/yangkun19921001/Blog/blob/master/about.md" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">联系我</span></span><span class="level-right"><span class="level-item tag">github.com</span></span></a></li><li><a class="level is-mobile is-mobile" href="https://juejin.im/user/578259398ac2470061f3a3fb/posts" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">掘金</span></span><span class="level-right"><span class="level-item tag">juejin.im</span></span></a></li></ul></div></div></div><div class="card widget"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile is-marginless" href="/categories/README/"><span class="level-start"><span class="level-item">README</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile is-marginless" href="/categories/%E4%B8%93%E9%A2%98/"><span class="level-start"><span class="level-item">专题</span></span><span class="level-end"><span class="level-item tag">25</span></span></a><ul class="mr-0"><li><a class="level is-mobile is-marginless" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"><span class="level-start"><span class="level-item">性能优化</span></span><span class="level-end"><span class="level-item tag">13</span></span></a></li><li><a class="level is-mobile is-marginless" href="/categories/%E4%B8%93%E9%A2%98/%E9%9F%B3%E8%A7%86%E9%A2%91/"><span class="level-start"><span class="level-item">音视频</span></span><span class="level-end"><span class="level-item tag">11</span></span></a></li></ul></li><li><a class="level is-mobile is-marginless" href="/categories/%E6%9C%8D%E5%8A%A1/"><span class="level-start"><span class="level-item">服务</span></span><span class="level-end"><span class="level-item tag">2</span></span></a><ul class="mr-0"><li><a class="level is-mobile is-marginless" href="/categories/%E6%9C%8D%E5%8A%A1/apprtc/"><span class="level-start"><span class="level-item">apprtc</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile is-marginless" href="/categories/%E6%9C%8D%E5%8A%A1/nginx/"><span class="level-start"><span class="level-item">nginx</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li></ul></div></div></div><div class="card widget"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile is-marginless" href="/archives/2020/06/"><span class="level-start"><span class="level-item">六月 2020</span></span><span class="level-end"><span class="level-item tag">28</span></span></a></li></ul></div></div></div><div class="card widget"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/webrtc/"><span class="tag">webrtc</span><span class="tag is-grey-lightest">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%85%B3%E4%BA%8E%E6%88%91/"><span class="tag">关于我</span><span class="tag is-grey-lightest">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"><span class="tag">性能优化</span><span class="tag is-grey-lightest">14</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E9%9F%B3%E8%A7%86%E9%A2%91%E5%AD%A6%E4%B9%A0%E8%B7%AF%E7%BA%BF/"><span class="tag">音视频学习路线</span><span class="tag is-grey-lightest">12</span></a></div></div></div></div></div><div class="column-right-shadow is-hidden-widescreen"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3"><div class="card widget"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-05T05:26:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/about/">README</a></p><p class="is-uppercase"><a class="link-muted" href="/categories/README/">README</a></p></div></article><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-04T16:33:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/%E5%BF%85%E7%9C%8B%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%80%BB%E7%BB%93/">必看的性能优化总结</a></p><p class="is-uppercase"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a> / <a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></p></div></article><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-04T16:31:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%B8%89-%E7%A8%B3%E5%AE%9A%E8%BF%90%E8%A1%8C%E4%BC%98%E5%8C%96%E4%B9%8B%E6%8D%95%E8%8E%B7-Native-Crash/">性能优化 (十三) 稳定运行优化之捕获 Native Crash </a></p><p class="is-uppercase"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a> / <a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></p></div></article><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-04T16:30:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%BA%8C-%E4%BD%93%E7%A7%AF%E4%BC%98%E5%8C%96%E4%B9%8B%E6%9E%81%E9%99%90%E7%98%A6%E8%BA%AB/">性能优化 (十二) 体积优化之极限瘦身</a></p><p class="is-uppercase"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a> / <a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></p></div></article><article class="media"><div class="media-content size-small"><p><time dateTime="2020-06-04T16:29:00.000Z">2020-06-05</time></p><p class="title is-6"><a class="link-muted" href="/2020/06/05/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E5%8D%81%E4%B8%80-%E7%A8%B3%E5%AE%9A%E8%BF%90%E8%A1%8C%E4%BC%98%E5%8C%96%E4%B9%8B%E7%83%AD%E4%BF%AE%E5%A4%8D%E5%8E%9F%E7%90%86%E6%8E%A2%E7%B4%A2/">性能优化 (十一) 稳定运行优化之热修复原理探索</a></p><p class="is-uppercase"><a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/">专题</a> / <a class="link-muted" href="/categories/%E4%B8%93%E9%A2%98/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">性能优化</a></p></div></article></div></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="DevYK 个人博客" height="28"></a><p class="size-small"><span>&copy; 2020 DevYK</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a><br><a href="http://www.beian.miit.gov.cn">京ICP备19052442号-1</a><br><span id="busuanzi_container_site_uv">共<span id="busuanzi_value_site_uv">0</span>个访客</span></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            site: {
+                url: 'http://yoursite.com',
+                external_link: {"enable":true,"exclude":[]}
+            },
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
